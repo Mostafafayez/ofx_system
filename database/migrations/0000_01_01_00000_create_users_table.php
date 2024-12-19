@@ -15,10 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
+            $table->string('phone');
+            $table->string('National_id')->unique();
+            $table->date('birth_date');
+            $table->unsignedBigInteger('department_id')->nullable();
+            $table->unsignedBigInteger('team_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+
+            // Foreign key constraints
+            $table->foreign('department_id')->references('id')->on('departments')->onDelete('set null');
+
+
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
