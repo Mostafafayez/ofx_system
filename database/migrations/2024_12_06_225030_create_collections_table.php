@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('contract_service_id')->constrained('contract_services')->onDelete('cascade');
             $table->decimal('amount', 10, 2);
             $table->date('date');
+            $table->text('invoice')->nullable();
             $table->enum('status', ['Pending', 'Paid'])->default('Pending');
             $table->enum('is_approval', ['true', 'false'])->default('false');
             $table->softDeletes();

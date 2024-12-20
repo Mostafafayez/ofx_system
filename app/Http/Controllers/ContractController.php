@@ -187,8 +187,16 @@ class ContractController extends Controller
             'contract_service_id' => 'required|exists:contract_services,id',
             'amount' => 'required|numeric',
             'date' => 'required|date',
+            'invoice'=>'required|file|mimes:pdf,xlsx,csv|max:2048',
             'status' => 'required|in:pending,paid',
         ]);
+
+
+
+
+    $file = $request->file('invoice');
+    $filePath = $file->store('invoice', 'public');
+
 
         $collection = Collection::create($request->only('contract_service_id', 'amount', 'date', 'status'));
 
