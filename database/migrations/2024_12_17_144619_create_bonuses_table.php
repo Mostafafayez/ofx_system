@@ -19,8 +19,7 @@ return new class extends Migration
             $table->decimal('bonus_amount', 15, 2)->nullable();
             $table->decimal('bonus_percentage', 5, 2)->nullable();
             $table->enum('status', ['pending', 'achieved', 'missed'])->default('pending');
-            $table->decimal('bonus_amount', 10, 2)->default(0);
-            $table->timestamp('valid_month')->nullable(); 
+            $table->timestamp('valid_month')->nullable();
             $table->timestamps();
 
             // Foreign keys
