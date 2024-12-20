@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('service_id');
             $table->unsignedBigInteger('department_id');
-            $table->decimal('target', 15, 2); // Target sales amount
-            $table->decimal('bonus_amount', 15, 2)->nullable(); // Fixed bonus amount
-            $table->decimal('bonus_percentage', 5, 2)->nullable(); // Bonus as a percentage
-            $table->string('status')->default(['pending','achieved', 'missed']); // Status: pending, achieved, missed
+            $table->decimal('target', 15, 2);
+            $table->decimal('bonus_amount', 15, 2)->nullable();
+            $table->decimal('bonus_percentage', 5, 2)->nullable();
+            $table->enum('status', ['pending', 'achieved', 'missed'])->default('pending');
             $table->decimal('bonus_amount', 10, 2)->default(0);
-            $table->timestamp('valid_month')->nullable(); // Month-Year for validation
+            $table->timestamp('valid_month')->nullable(); 
             $table->timestamps();
 
             // Foreign keys
