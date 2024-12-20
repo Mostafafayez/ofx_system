@@ -101,7 +101,7 @@ class LiabilityController extends Controller
         ]);
     }
 
-        public public function getMonthlyReport(Request $request)
+       public function getMonthlyReport(Request $request)
         {
             $request->validate([
                 'month' => 'required|integer|between:1,12',
