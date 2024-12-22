@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user/{id}', [EmployeeController::class, 'deleteUser']);
     Route::post('/user/{id}/password', [EmployeeController::class, 'updatePassword']);
     Route::get('/teamleaders', [EmployeeController::class, 'index']);
+    Route::get('/roles', [EmployeeController::class, 'getAllRoles']);
 
 });
 
@@ -187,6 +188,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware('role:owner')->group(function () {
+        Route::get('/allteams', [TeamController::class, 'getAllTeams']);
         Route::get('/all', [TeamController::class, 'getAllTeamsWithLeaders']);
         Route::post('team/department', [TeamController::class, 'filterAllTeamsWithdepartment']);
         Route::post('/teams', [TeamController::class, 'store']);

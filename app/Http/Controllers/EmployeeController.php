@@ -22,6 +22,21 @@ class EmployeeController extends Controller
     // }
 
 
+
+    public function getAllRoles()
+    {
+        $user = auth()->user();
+
+
+        if (!$user->hasRole('owner')) {
+            return response()->json(['message' => 'Permission denied: Only owners'], 403);
+        }
+
+        $roles = Role::all();
+        return response()->json($roles);
+    }
+
+
     public function register(Request $request)
     {
         $user = auth()->user();
@@ -40,18 +55,6 @@ class EmployeeController extends Controller
             'role' => 'required|string|exists:roles,name',
             'national_id'=>'required|string',
             'birth_date'=>'required|date',
-            'manager_id' => [
-                'nullable',
-                'integer',
-                'exists:users,id',
-                function ($attribute, $value, $fail) {
-
-                    $user = User::find($value);
-                    if ($user && !$user->hasRole('manager')) {
-                        $fail('The selected manager is not assigned the "manager" role.');
-                    }
-                }
-            ],
             'team_id' => 'required|integer|exists:teams,id',
             'department_id' => 'required|integer|exists:departments,id',
             'permissions' => 'sometimes|array',

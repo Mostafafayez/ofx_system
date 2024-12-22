@@ -88,13 +88,12 @@ class TeamController extends Controller
     }
 
 
-    public function getAllTeamsWithLeaders()
+    public function getAllTeams()
 {
-    $teams = Team::with('users','teamLeader','department')->get();
+    $teams = Team::all();
 
     return response()->json([
-        'teams' => $teams,
-    ]);
+        'teams' => $teams ],200);
 }
 
 public function filterAllTeamsWithdepartment(Request $request)
