@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Rules\HasRole;
 class TeamController extends Controller
 {
 
@@ -27,7 +28,7 @@ class TeamController extends Controller
 
          $validated = $request->validate([
              'name' => 'required|string|max:255',
-             'teamleader_id' => 'required|integer|exists:users,id',
+             'teamleader_id' => ['required', 'exists:users,id', new HasRole('teamleader')],,
              'service_id' => 'required|integer|exists:services,id',
              'branch' => 'required|string|max:255',
          ]);

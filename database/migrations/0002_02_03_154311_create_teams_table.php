@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('branch');
             $table->unsignedBigInteger('service_id')->nullable();
-             $table->unsignedBigInteger('team_leader_id')->nullable();
+             $table->unsignedBigInteger('teamleader_id')->nullable();
             $table->timestamps();
 
             // Foreign key constraints
