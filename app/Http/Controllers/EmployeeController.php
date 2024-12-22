@@ -67,7 +67,7 @@ class EmployeeController extends Controller
             'password' => 'required|string|min:6',
             'phone' => 'required|string',
             'role' => 'required|string|exists:roles,name',
-            'national_id'=>'required|string',
+            'national_id'=>'required|string|unique:users,national_id',
             'birth_date'=>'required|date',
             'team_id' => 'required|integer|exists:teams,id',
             'department_id' => 'required|integer|exists:departments,id',
