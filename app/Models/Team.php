@@ -9,7 +9,7 @@ class Team extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'teamleader_id','department_id','service_id','branch'];
+    protected $fillable = ['name', 'teamleader_id','service_id','branch'];
 
 
     public function users()
@@ -17,10 +17,16 @@ class Team extends Model
         return $this->hasMany(User::class);
     }
 
+
+    public function managers()
+    {
+        return $this->belongsToMany(User::class, 'manager_team', 'team_id', 'user_id')->withTimestamps();
+    }
+
     public function contracts()
-{
-    return $this->hasManyThrough(Contract::class, User::class, 'team_id', 'sales_employee_id');
-}
+    {
+        return $this->hasManyThrough(Contract::class, User::class, 'team_id', 'sales_employee_id');
+    }
 
     public function service()
     {
@@ -42,14 +48,12 @@ class Team extends Model
     }
 
 
-    public function department()
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
+    // public function department()
+    // {
+    //     return $this->belongsTo(Department::class, 'department_id');
+    // }
 
 
-// create api to "senario: there were role called branch manager that can view his teams    ,each team has brach how to handle that byhis token  and his role ""
-// sunctum for auth , spaite for authroziation ,
-//team model :
+
 
 }

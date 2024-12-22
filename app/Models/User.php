@@ -59,6 +59,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'manager_team', 'user_id', 'team_id')->withTimestamps();
+    }
+
     public function leads_notes(): HasManyThrough
     {
         return $this->hasManyThrough(Note::class, Lead::class,'sales_id','notable_id');

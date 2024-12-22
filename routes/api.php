@@ -21,7 +21,7 @@ use Spatie\Permission\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\LiabilityController;
 use App\Http\Controllers\PriceListController;
-
+use App\Http\Controllers\ManagerController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -37,6 +37,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [EmployeeController::class, 'index']);
 
 });
+
+
+
+
+Route::midllware('auth:sanctum')->prefix('managers')->group(function () {
+    Route::post('/add', [ManagerController::class, 'addManagerWithTeams']);
+    Route::get('/', [ManagerController::class, 'getAllManagersWithTeams']);
+    Route::get('/{id}', [ManagerController::class, 'getManagerById']);
+    Route::delete('/{id}', [ManagerController::class, 'deleteManager']);
+});
+
 
 
 Route::delete('/users/{id}/delete', [EmployeeController::class, 'softDeleteUser']);
