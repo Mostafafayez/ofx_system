@@ -67,7 +67,7 @@ public function boot(): void
 
     Gate::define('team_control', function ($user) {
 
-        return $user->hasRole('team_leader') || $user->can('manage_teams');
+        return $user->hasRole('owner') || $user->can('manage_teams');
     });
 
 }
