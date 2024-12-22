@@ -82,7 +82,6 @@ class EmployeeController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'National_id' =>$request->national_id,
-            'manager_id'=>$request->manager_id,
             'birth_date' =>$request->birth_date,
             'team_id' => $request->team_id,
             'department_id' => $request->department_id,
