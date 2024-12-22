@@ -37,6 +37,20 @@ class EmployeeController extends Controller
     }
 
 
+    public function getAllPermissions()
+    {
+        $user = auth()->user();
+
+
+        if (!$user->hasRole('owner')) {
+            return response()->json(['message' => 'Permission denied: Only owners'], 403);
+        }
+
+        $roles = Permission::all();
+        return response()->json($roles);
+    }
+
+
     public function register(Request $request)
     {
         $user = auth()->user();

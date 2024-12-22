@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/{id}/password', [EmployeeController::class, 'updatePassword']);
     Route::get('/teamleaders', [EmployeeController::class, 'index']);
     Route::get('/roles', [EmployeeController::class, 'getAllRoles']);
-
+    Route::get('/Permissions', [EmployeeController::class, 'getAllPermissions']);
 });
 
 
