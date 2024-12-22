@@ -241,7 +241,7 @@ public function index()
     }
 
 
-    $users = User::role('teamleader')->paginate(10);
+    $users = User::role('teamleader')->get();
 
     return response()->json($users);
 }
