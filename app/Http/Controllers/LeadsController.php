@@ -189,7 +189,7 @@ public function create(Request $request)
         $request->validate([
             'lead_id' => 'required|exists:leads,id',
             'offer' => 'required|file|mimes:pdf,jpeg,png|max:2048',
-            'description' =>'required|text',
+            'description' =>'required|string',
             'valid_until'=>'required|date'
         ]);
 
