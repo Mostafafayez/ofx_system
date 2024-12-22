@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/add_employee', [EmployeeController::class, 'register']);
     Route::delete('/user/{id}', [EmployeeController::class, 'deleteUser']);
     Route::post('/user/{id}/password', [EmployeeController::class, 'updatePassword']);
-    Route::get('/users', [EmployeeController::class, 'index']);
+    Route::get('/teamleaders', [EmployeeController::class, 'index']);
 
 });
 
