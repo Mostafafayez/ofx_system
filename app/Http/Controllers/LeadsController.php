@@ -270,7 +270,7 @@ public function filterfollowupsByStatus(Request $request,$leadid)
     $user = auth()->user();
 
     $validated = $request->validate([
-        'status' =>'required|in:Un-qualified,qualified,cold-lead,hot-lead',
+        'status' =>'required|in:un-qualified,qualified,cold-lead,hot-lead',
     ]);
 
     $status = $validated['status'];
