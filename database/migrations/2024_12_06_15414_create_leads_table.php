@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('sales_id')->nullable();
-            $table->string('name');
+            $table->string('company_name');
+            $table->string('client_name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
+            $table->string('from_where');
             $table->enum('status', ['new', 'in_progress', 'closed'])->default('new');
             $table->timestamps();
             $table->softDeletes();

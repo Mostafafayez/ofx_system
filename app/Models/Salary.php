@@ -14,7 +14,7 @@ class Salary extends Model
         'user_id',
         'base_salary',
         'target_percentage',
-        'target ',
+        'target',
         'commission_percentage',
 
     ];
