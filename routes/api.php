@@ -277,6 +277,8 @@ Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
 
     Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
     Route::post('/technical', [SalaryController::class, 'calculateTechnicalSalaries']);
+    Route::post('/employee', [SalaryController::class, 'addSalary']);
+
 });
 
 

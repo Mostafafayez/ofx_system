@@ -5,14 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Bonus;
 use App\Models\Contract;
 use App\Models\MonthlySalary;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Salary;
 use App\Models\ContractService;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class SalaryController extends Controller
 {
+
+    use AuthorizesRequests;
+
+    public function __construct()
+    {
+
+        $this->authorize('owner');
+    }
+
     public function calculateAllSalaries(Request $request)
     {
         // Validate the request for month and year
@@ -286,4 +297,33 @@ public function calculateAllSalesSalaries(Request $request)
         ], 200);
     }
 
-}
+
+
+
+        public function addSalary(Request $request)
+        {
+
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'base_salary' => 'required|numeric|min:0',
+                'target_percentage' => 'required|numeric|min:0|max:100',
+                'target' => 'required|numeric|min:0',
+                'commission_percentage' => 'required|numeric|min:0|max:100',
+            ]);
+
+            // Create salary record
+            $salary = Salary::create([
+                'user_id' => $request->user_id,
+                'base_salary' => $request->base_salary,
+                'target_percentage' => $request->target_percentage,
+                'target' => $request->target,
+                'commission_percentage' => $request->commission_percentage,
+            ]);
+
+            return response()->json(['message' => 'Salary added successfully', 'data' => $salary], 201);
+        }
+    }
+
+
+
+
