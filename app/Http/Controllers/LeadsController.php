@@ -195,7 +195,7 @@ public function create(Request $request)
 
         if ($request->hasFile('offer') && $request->file('offer')->isValid()) {
 
-            $filePath = $request->file('offers')->store('offers', 'public');
+            $filePath = $request->file('offer')->store('offers', 'public');
 
         $offer = Offer::create([
             'lead_id' => $request->lead_id,
