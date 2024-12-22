@@ -168,7 +168,7 @@ public function create(Request $request)
             'lead_id' => 'required|exists:leads,id',
             'details' => 'required|string|max:255',
             'followed_date' => 'required|date',
-            'status' =>'required|in:Un-qualified,qualified,cold-lead,hot-lead',
+            'status' =>'required|in:un-qualified,qualified,cold-lead,hot-lead',
         ]);
 
         $followUp = FollowUp::create([
