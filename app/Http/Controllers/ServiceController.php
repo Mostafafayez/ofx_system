@@ -76,8 +76,6 @@ use AuthorizesRequests;
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'servicable_type' => ['required', 'string', Rule::in(['user', 'team'])],
-            'servicable_id' => 'required|integer',
         ]);
 
 
@@ -94,8 +92,7 @@ use AuthorizesRequests;
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'servicable_type' => 'required|string|in:App\Models\User,App\Models\Team',
-            'servicable_id' => 'required|integer|exists:users,id|exists:teams,id',
+    
         ]);
 
         $service = Service::findOrFail($id);
