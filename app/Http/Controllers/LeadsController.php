@@ -96,7 +96,8 @@ public function create(Request $request)
         'company_name' => 'required|string|max:255',
         'client_name' => 'required|string|max:255',
         'email' => 'required|email',
-        'phone' => 'required|array',
+        'phone' => 'required|array|min:1', 
+        'phone.*' => 'required|string|max:15',
         'from_where' =>'required|string|max:255',
     ]);
 
