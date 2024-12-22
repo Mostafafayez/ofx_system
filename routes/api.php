@@ -67,17 +67,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/leads/{id}/check-followup', [LeadsController::class, 'checkFollowUp']);
 
     Route::post('/leads/{id}/status', [LeadsController::class, 'updateStatus']);
-    Route::post('/followups', [LeadsController::class, 'addFollowUp']);
+
     Route::post('/offers', [LeadsController::class, 'addOffer']);
     Route::get('leads/user', [LeadsController::class, 'getLeadsWithDetails']);
     Route::get('leads/filter_status/{status}', [LeadsController::class, 'filterLeadsByStatus']);
     Route::get('leads/all/filter_status/{status}', [LeadsController::class, 'filterallLeadsByStatus']);
-    Route::get('/followups/{leadid}/filter', [LeadsController::class, 'filterfollowupsByStatus']);
-    Route::get('/allfollowups/filter', [LeadsController::class, 'filterallfollowupsByStatus']);
+
+
 
 
 });
 
+
+
+//followups
+Route::middleware('auth:sanctum')->prefix('followups')->group(function () {
+    Route::post('/', [LeadsController::class, 'addFollowUp']);
+    Route::get('/filter/{leadid}', [LeadsController::class, 'filterfollowupsByStatus']);
+    Route::get('/{leadid}', [LeadsController::class, 'allfollowups']);
+    Route::get('/all/filter', [LeadsController::class, 'filterallfollowupsByStatus']);
+});
 
 //leads for each team
 Route::middleware('auth:sanctum')->group(function () {
