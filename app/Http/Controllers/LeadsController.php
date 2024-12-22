@@ -107,11 +107,11 @@ public function create(Request $request)
     if ($existingLead) {
 
         $lastFollowUp = FollowUp::where('lead_id', $existingLead->id)
-            ->latest('followup_date')
+            ->latest('followed_date')
             ->first();
 
 
-        if ($lastFollowUp && Carbon::parse($lastFollowUp->followup_date)->addDays(10)->isFuture()) {
+        if ($lastFollowUp && Carbon::parse($lastFollowUp->followed_date)->addDays(10)->isFuture()) {
             return response()->json([
                 'message' => 'This lead already exists and is assigned to another salesperson.',
                 'sales_id' => $existingLead->sales_id,
