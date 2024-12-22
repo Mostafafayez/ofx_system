@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::midllware('auth:sanctum')->prefix('managers')->group(function () {
+Route::middleware('auth:sanctum')->prefix('managers')->group(function () {
     Route::post('/add', [ManagerController::class, 'addManagerWithTeams']);
     Route::get('/', [ManagerController::class, 'getAllManagersWithTeams']);
     Route::get('/{id}', [ManagerController::class, 'getManagerById']);

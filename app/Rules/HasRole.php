@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 
+use App\Models\User;
 use Illuminate\Contracts\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
@@ -17,8 +18,8 @@ class HasRole implements Rule
 
     public function passes($attribute, $value)
     {
-        $user = \App\Models\User::find($value);
-        return $user && $user->hasRole($this->role);
+        $user = User::find($value);
+        return $user && $user->hasrole($this->role);
     }
 
     public function message()
