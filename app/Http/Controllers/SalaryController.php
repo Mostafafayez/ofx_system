@@ -310,7 +310,7 @@ public function calculateAllSalesSalaries(Request $request)
                 'target' => 'required|numeric|min:0',
                 'commission_percentage' => 'required|numeric|min:0|max:100',
             ]);
-                        log::info($request);
+                        // log::info($request);
             // Create salary record
             $salary = Salary::create([
                 'user_id' => $request->user_id,
