@@ -12,7 +12,9 @@ class Lead extends Model
 
     protected $fillable = ['sales_id','company_name','client_name', 'email', 'phone', 'status','from_Where'];
 
-
+    protected $casts = [
+        'phone' => 'array',
+    ];
 
     public function sales()
     {
