@@ -68,7 +68,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/leads/{id}/status', [LeadsController::class, 'updateStatus']);
 
-    Route::post('/offers', [LeadsController::class, 'addOffer']);
+
+
     Route::get('leads/user', [LeadsController::class, 'getLeadsWithDetails']);
     Route::get('leads/filter_status/{status}', [LeadsController::class, 'filterLeadsByStatus']);
     Route::get('leads/all/filter_status/{status}', [LeadsController::class, 'filterallLeadsByStatus']);
@@ -78,6 +79,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
+Route::middleware('auth:sanctum')->prefix('offers')->group(function () {
+    Route::post('/', [LeadsController::class, 'addOffer']);
+    Route::get('/{leadid}', [LeadsController::class, 'alloffers']);
+});
 
 
 //followups

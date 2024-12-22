@@ -286,9 +286,18 @@ public function filterfollowupsByStatus(Request $request,$leadid)
 
 public function allfollowups($leadid)
 {
-    $user = auth()->user();
+ 
 
     $leads = FollowUp::where('lead_id', $leadid)->get();
+
+    return response()->json($leads);
+}
+
+
+public function alloffers($leadid)
+{
+
+    $leads = Offer::where('lead_id', $leadid)->get();
 
     return response()->json($leads);
 }
