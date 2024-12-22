@@ -54,7 +54,7 @@ class LeadsController extends Controller
         // Get the authenticated user's ID
         $userId = auth()->user()->id;
 
-     
+
         $lead = Lead::find($id);
 
         if (!$lead) {
@@ -93,9 +93,11 @@ class LeadsController extends Controller
 public function create(Request $request)
 {
     $request->validate([
-        'name' => 'required|string|max:255',
+        'company_name' => 'required|string|max:255',
+        'client_name' => 'required|string|max:255',
         'email' => 'required|email',
         'phone' => 'required|array',
+        'from_where' =>'required|string|max:255',
     ]);
 
 
@@ -120,9 +122,11 @@ public function create(Request $request)
 
     $lead = Lead::create([
         'sales_id' => auth()->user()->id,
-        'name' => $request->name,
+        'company_name' => $request->company_name,
+        'client_name' => $request->client_name,
         'email' => $request->email,
         'phone' => $request->phone,
+        'from_where' => $request->from_where,
         'status' => 'new',
     ]);
 
