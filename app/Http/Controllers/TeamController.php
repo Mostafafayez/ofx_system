@@ -28,7 +28,7 @@ class TeamController extends Controller
 
          $validated = $request->validate([
              'name' => 'required|string|max:255',
-             'teamleader_id' => ['required', 'exists:users,id', new HasRole('teamleader')],,
+             'teamleader_id' => ['required', 'exists:users,id', new HasRole('teamleader')],
              'service_id' => 'required|integer|exists:services,id',
              'branch' => 'required|string|max:255',
          ]);
