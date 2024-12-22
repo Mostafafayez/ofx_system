@@ -187,7 +187,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware('role:owner')->group(function () {
-        Route::get('/teamleaders', [TeamController::class, 'getAllTeamsWithLeaders']);
+        Route::get('/all', [TeamController::class, 'getAllTeamsWithLeaders']);
         Route::post('team/department', [TeamController::class, 'filterAllTeamsWithdepartment']);
         Route::post('/teams', [TeamController::class, 'store']);
     });
