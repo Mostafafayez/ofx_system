@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('lead_id');
             $table->text('details')->nullable();
-            $table->enum('status', ['Qualified', 'Un-qualified', 'Cold-lead','Hot-lead']);
+            $table->enum('status', ['qualified', 'un-qualified', 'cold-lead','hot-lead']);
             $table->date('followed_date');
             $table->timestamps();
 
