@@ -83,14 +83,14 @@ Route::middleware('auth:sanctum')->group(function () {
 //followups
 Route::middleware('auth:sanctum')->prefix('followups')->group(function () {
     Route::post('/', [LeadsController::class, 'addFollowUp']);
-    Route::get('/filter/{leadid}', [LeadsController::class, 'filterfollowupsByStatus']);
+    Route::post('/filter/{leadid}', [LeadsController::class, 'filterfollowupsByStatus']);
     Route::get('/{leadid}', [LeadsController::class, 'allfollowups']);
     Route::get('/all/filter', [LeadsController::class, 'filterallfollowupsByStatus']);
 });
 
 //leads for each team
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/allfollowups/filter', [Leads_adminController::class, 'filterfollowupsByStatus']);
+    // Route::get('/allfollowups/filter', [Leads_adminController::class, 'filterfollowupsByStatus']);
 });
 
 
