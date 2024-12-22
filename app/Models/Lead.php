@@ -10,7 +10,7 @@ class Lead extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['sales_id','company_name','client_name', 'email', 'phone', 'status','from_Where'];
+    protected $fillable = ['sales_id','company_name','client_name', 'email', 'phone', 'status','from_where'];
 
     protected $casts = [
         'phone' => 'array',
