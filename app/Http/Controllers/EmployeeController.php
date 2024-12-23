@@ -337,7 +337,13 @@ public function index()
                     $today->copy()->addDays(7)->format('Y-m-d') ,
                 ]
             )
-            ->sortBy('days_until_birthday'); 
+            ->get() // Fetch the results from the database
+            ->map(function($user) use ($today) {
+                // Calculate the number of days between the user's birthday and today
+                $user->days_until_birthday = $this->calculateDaysUntilBirthday($user->birth_date, $today);
+                return $user;
+            })
+            ->sortBy('days_until_birthday');  // Sort the collection by days until the birthday
 
     return response()->json($users, 200);
 }
