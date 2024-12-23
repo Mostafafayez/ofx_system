@@ -315,7 +315,7 @@ public function index()
      * Retrieve all users ordered by birth month.
      */
 
-
+   
 
      public function getUsersByBirthMonth()
      {
@@ -344,7 +344,8 @@ public function index()
                  $user->days_until_birthday = $this->calculateDaysUntilBirthday($user->birth_date, $today);
                  return $user;
              })
-             ->sortBy('days_until_birthday');  // Sort the collection by days until the birthday
+             ->sortBy('days_until_birthday')  // Sort the collection by days until the birthday
+             ->values();  // Reindex the array to get a clean array format
 
          return response()->json($users, 200);
      }
@@ -361,7 +362,7 @@ public function index()
          }
 
          // Return the difference in days between today and the user's next birthday
-         return $today->diffInDays($birthdayThisYear, false);  // Use `false` to allow negative difference for past birthdays
+         return $birthdayThisYear->diffInDays($today, false);  // Use `false` to allow negative difference for past birthdays
      }
 
 }
