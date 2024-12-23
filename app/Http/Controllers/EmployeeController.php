@@ -324,7 +324,7 @@ public function index()
         }
 
         $users = User::select('id', 'name', 'birth_date')
-            ->orderByRaw('MONTH(birth_date)')
+         ->orderByRaw('MONTH(birth_date), DAY(birth_date)')
             ->get();
 
         return response()->json($users, 200);
