@@ -7,7 +7,7 @@ use App\Models\PriceList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Storage;
+
 class PriceListController extends Controller
 {
 
