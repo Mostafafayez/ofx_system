@@ -265,11 +265,12 @@ Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
 Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
     Route::middleware('role:sales')->group(function () {
     Route::get('/', [PriceListController::class, 'getAll']);
-    Route::delete('/{id}', [PriceListController::class, 'delete']);
+
 });
     Route::middleware('role:owner')->group(function () {
     Route::post('/', [PriceListController::class, 'store']);
     Route::put('/{id}', [PriceListController::class, 'update']);
+    Route::delete('/{id}', [PriceListController::class, 'delete']);
 });
 
 });
