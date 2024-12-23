@@ -263,7 +263,7 @@ Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
 
 // price_list
 Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
-    Route::middleware('role:sales')->group(function () {
+    Route::middleware(['role:sales','role:owner'])->group(function () {
     Route::get('/', [PriceListController::class, 'getAll']);
 
 });
