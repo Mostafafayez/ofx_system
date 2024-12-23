@@ -51,10 +51,11 @@ Route::middleware('auth:sanctum')->prefix('managers')->group(function () {
 
 
 
+Route::middleware('auth:sanctum')->group(function () {
 Route::delete('/users/{id}/delete', [EmployeeController::class, 'softDeleteUser']);
 Route::patch('/users/{id}/restore', [EmployeeController::class, 'restoreUser']);
 Route::get('/users/birth-month', [EmployeeController::class, 'getUsersByBirthMonth']);
-
+});
 
 //add role"owner"
 Route::middleware('auth:sanctum')->group(function () {
