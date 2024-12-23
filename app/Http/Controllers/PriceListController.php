@@ -37,7 +37,7 @@ class PriceListController extends Controller
 
 
         $priceList = PriceList::create([
-            'description' => $request->pricelist_path,
+            'description' => $request->description,
             'pricelist_path' => $filePath,
         ]);
 

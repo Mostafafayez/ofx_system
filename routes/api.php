@@ -272,6 +272,8 @@ Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
 });
 
 });
+Route::post('/testwwww', [PriceListController::class, 'store']);
+
 
 Route::prefix('dashboard')->middleware(['auth:sanctum','role:owner'])->group(function () {
 //owner

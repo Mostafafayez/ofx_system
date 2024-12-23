@@ -21,24 +21,31 @@ class LayoutController extends Controller
 
 
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'question' => 'required|string',
-            'type' => 'required|string',
-            'options' => 'sometime|array|nullable',
-        ]);
+        public function store(Request $request)
+        {
+            $request->validate([
+                'service_id' => 'required|exists:services,id',
+                'questions' => 'required|array',
+                'questions.*.question' => 'required|string',
+                'questions.*.type' => 'required|string',
+                'questions.*.options' => 'nullable|array',
+            ]);
 
-        $question = Layout::create([
-            'service_id' => $request->service_id,
-            'question' => $request->question,
-            'type' => $request->type,
-            'options' => $request->options,
-        ]);
+            $createdQuestions = [];
 
-        return response()->json($question, Response::HTTP_CREATED);
-    }
+            foreach ($request->questions as $questionData) {
+                $createdQuestions[] = Layout::create([
+                    'service_id' => $request->service_id,
+                    'question' => $questionData['question'],
+                    'type' => $questionData['type'],
+                    'options' => $questionData['options'] ?? null,
+                ]);
+            }
+
+            return response()->json($createdQuestions, 200);
+        }
+
+
 
     // Get all questions
     public function index()
