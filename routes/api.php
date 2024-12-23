@@ -263,10 +263,9 @@ Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
 
 // price_list
 Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
-    Route::middleware(['role:sales','role:owner'])->group(function () {
+
     Route::get('/', [PriceListController::class, 'getAll']);
 
-});
     Route::middleware('role:owner')->group(function () {
     Route::post('/', [PriceListController::class, 'store']);
     Route::put('/{id}', [PriceListController::class, 'update']);
