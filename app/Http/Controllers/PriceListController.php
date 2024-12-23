@@ -7,7 +7,7 @@ use App\Models\PriceList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
+use Illuminate\Support\Facades\Storage;
 class PriceListController extends Controller
 {
 
@@ -53,6 +53,8 @@ class PriceListController extends Controller
     }
 
     // Delete a price list
+
+
     public function delete($id)
     {
         $priceList = PriceList::find($id);
@@ -60,6 +62,12 @@ class PriceListController extends Controller
         if (!$priceList) {
             return response()->json(['message' => 'Price List not found'], 404);
         }
+
+
+        if ($priceList->pricelist_path && Storage::disk('public')->exists($priceList->pricelist_path)) {
+            Storage::disk('public')->delete($priceList->pricelist_path);
+        }
+
 
         $priceList->delete();
 
