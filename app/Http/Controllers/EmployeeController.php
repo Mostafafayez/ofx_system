@@ -337,10 +337,24 @@ public function index()
                     $today->copy()->addDays(7)->format('Y-m-d') ,
                 ]
             )
-            ->get();
+            ->sortBy('days_until_birthday'); 
 
-        return response()->json($users, 200);
+    return response()->json($users, 200);
+}
+
+// Helper method to calculate days until next birthday
+private function calculateDaysUntilBirthday($birthDate, $today)
+{
+
+    $birthdayThisYear = Carbon::parse($birthDate)->year($today->year);
+
+
+    if ($birthdayThisYear->isPast()) {
+        $birthdayThisYear->addYear();
     }
+
+    return $birthdayThisYear->diffInDays($today);
+}
 
 }
 
