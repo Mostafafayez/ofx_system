@@ -316,51 +316,53 @@ public function index()
      */
 
 
-    public function getUsersByBirthMonth()
-    {
-        $user = auth()->user();
 
-        if (!$user->hasRole('owner')) {
-            return response()->json(['message' => 'Permission denied'], 403);
-        }
+     public function getUsersByBirthMonth()
+     {
+         $user = auth()->user();
 
+         if (!$user->hasRole('owner')) {
+             return response()->json(['message' => 'Permission denied'], 403);
+         }
 
-        $today = Carbon::today();
+         // Get today's date
+         $today = Carbon::today();
 
+         // Get users with birth month and day that match today's month and a day range (e.g., +/- 7 days)
+         $users = User::select('id', 'name', 'birth_date')
+             ->whereMonth('birth_date', $today->month)  // Filter by current month
+             ->whereBetween(
+                 'birth_date',
+                 [
+                     $today->copy()->subDays(7)->format('Y-m-d'), // 7 days before today
+                     $today->copy()->addDays(7)->format('Y-m-d')  // 7 days after today
+                 ]
+             )
+             ->get() // Fetch the results from the database
+             ->map(function($user) use ($today) {
+                 // Calculate the number of days between the user's birthday and today
+                 $user->days_until_birthday = $this->calculateDaysUntilBirthday($user->birth_date, $today);
+                 return $user;
+             })
+             ->sortBy('days_until_birthday');  // Sort the collection by days until the birthday
 
-        $users = User::select('id', 'name', 'birth_date')
-            ->whereMonth('birth_date', $today->month)
-            ->whereBetween(
-                'birth_date',
-                [
-                    $today->copy()->subDays(7)->format('Y-m-d'),
-                    $today->copy()->addDays(7)->format('Y-m-d') ,
-                ]
-            )
-            ->get() // Fetch the results from the database
-            ->map(function($user) use ($today) {
-                // Calculate the number of days between the user's birthday and today
-                $user->days_until_birthday = $this->calculateDaysUntilBirthday($user->birth_date, $today);
-                return $user;
-            })
-            ->sortBy('days_until_birthday');  // Sort the collection by days until the birthday
+         return response()->json($users, 200);
+     }
 
-    return response()->json($users, 200);
-}
+     // Helper method to calculate days until next birthday
+     private function calculateDaysUntilBirthday($birthDate, $today)
+     {
+         // Create a Carbon instance for this user's birthday in the current year
+         $birthdayThisYear = Carbon::parse($birthDate)->year($today->year);
 
-// Helper method to calculate days until next birthday
-private function calculateDaysUntilBirthday($birthDate, $today)
-{
+         // If the birthday has already passed this year, use the next year
+         if ($birthdayThisYear->isPast()) {
+             $birthdayThisYear->addYear();
+         }
 
-    $birthdayThisYear = Carbon::parse($birthDate)->year($today->year);
-
-
-    if ($birthdayThisYear->isPast()) {
-        $birthdayThisYear->addYear();
-    }
-
-    return $birthdayThisYear->diffInDays($today);
-}
+         // Return the difference in days between today and the user's next birthday
+         return $today->diffInDays($birthdayThisYear, false);  // Use `false` to allow negative difference for past birthdays
+     }
 
 }
 
