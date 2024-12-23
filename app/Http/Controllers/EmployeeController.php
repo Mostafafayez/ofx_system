@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-
+use Carbon\Carbon;
 class EmployeeController extends Controller
 {
 
@@ -314,28 +314,35 @@ public function index()
     /**
      * Retrieve all users ordered by birth month.
      */
+
+
     public function getUsersByBirthMonth()
     {
-
         $user = auth()->user();
 
-        if (!$user->hasRole('owner') ) {
+        if (!$user->hasRole('owner')) {
             return response()->json(['message' => 'Permission denied'], 403);
         }
 
+
+        $today = Carbon::today();
+
+
         $users = User::select('id', 'name', 'birth_date')
-         ->orderByRaw('MONTH(birth_date), DAY(birth_date)')
+            ->whereMonth('birth_date', $today->month)
+            ->whereBetween(
+                'birth_date',
+                [
+                    $today->copy()->subDays(7)->format('Y-m-d'),
+                    $today->copy()->addDays(7)->format('Y-m-d') ,
+                ]
+            )
             ->get();
 
         return response()->json($users, 200);
     }
+
 }
 
 
-
-// i want to handle bouns it will be on specfices services for spicefic month  ""
-// that  if where bouns to each service  to spescpic department
-// if there was bouns for department_id=1 on services_id = 1 that if total amount for this services in spicefic month and tyear = target
-//it will be bouns but if department sales bouns = a precentage , other bouns = real amount
-// handle the best structurre for bouns and create all api that owner need to it and create migration , model , apis ,controller , table using sql query
 
