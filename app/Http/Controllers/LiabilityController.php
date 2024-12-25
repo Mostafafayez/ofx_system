@@ -59,7 +59,7 @@ public function store(Request $request)
     // Create the liability
     $liability = Liability::create([
         'user_id' => $user->id,
-        'total_amount' => $validated['amount'],
+        'amount' => $validated['total_amount'],
         'description' => $validated['description'],
         'type' => $validated['type'],
     ]);
