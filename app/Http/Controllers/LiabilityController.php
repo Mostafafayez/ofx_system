@@ -26,138 +26,49 @@ class LiabilityController extends Controller
     /**
      * Add a new liability.
      */
-// ...
+    public function store(Request $request)
+    {
+        $user = auth()->user();
 
-// public function index()
-// {
-//     // Log::info('Getting all liabilities');
-//     $liabilities = Liability::with('user', 'installments')->get();
-
-//     return response()->json([
-//         'message' => 'Liabilities retrieved successfully',
-//         'data' => $liabilities
-//     ]);
-// }
-
-public function store(Request $request)
-{
-    // Log::info('Creating a new liability');
-    $user = auth()->user();
-
-    $validated = $request->validate([
-        'amount' => 'required|numeric',
-        'type' => 'required|string|max:255',
-        'description' => 'required|string',
-        'installments' => 'required|array',
-        'installments' => 'required_if:type,installment|array', // Validate installments only if type is installment
-        'installments.*.amount' => 'required_if:type,installment|numeric',
-        'installments.*.due_date' => 'required_if:type,installment|date',
-        'installments.*.status' => 'required_if:type,installment|string|max:255',
-    ]);
+        $validated = $request->validate([
+            'amount' => 'required|numeric',
+            'type' => 'required|string|max:255',
+            'description' => 'required|string',
+            'installments' => 'required|array',
+            'installments' => 'required_if:type,installment|array',
+            'installments.*.amount' => 'required_if:type,installment|numeric',
+            'installments.*.due_date' => 'required_if:type,installment|date',
+            'installments.*.status' => 'required_if:type,installment|string|max:255',
+        ]);
 
 
-    // Create the liability
-    $liability = Liability::create([
-        'user_id' => $user->id,
-        'total_amount' => $validated['amount'],
-        'description' => $validated['description'],
-        'type' => $validated['type'],
-    ]);
+        // Create the liability
+        $liability = Liability::create([
+            'user_id' => $user->id,
+            'total_amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'type' => $validated['type'],
+        ]);
 
-    // Log::info('Liability created successfully', ['liability_id' => $liability->id]);
 
-    // If the type is installment, create the installment records
-    if ($validated['type'] === 'installment') {
-        foreach ($validated['installments'] as $installment) {
-            Installment::create([
-                'liability_id' => $liability->id,
-                'user_id' => $user->id,
-                'amount' => $installment['amount'],
-                'due_date' => $installment['due_date'],
-                'status' => $installment['status'],
-            ]);
+        // If the type is installment, create the installment records
+        if ($validated['type'] === 'installment') {
+            foreach ($validated['installments'] as $installment) {
+                Installment::create([
+                    'liability_id' => $liability->id,
+                    'user_id' => $validated['user_id'],
+                    'amount' => $installment['amount'],
+                    'due_date' => $installment['due_date'],
+                    'status' => $installment['status'],
+                ]);
+            }
         }
+
+        return response()->json([
+            'message' => 'Liability added successfully',
+            'data' => $liability->load('installments'), // Return liability with its installments
+        ], 201);
     }
-
-    // Log::info('Installments created successfully', ['liability_id' => $liability->id]);
-
-    return response()->json([
-        'message' => 'Liability added successfully',
-        'data' => $liability->load('installments'), // Return liability with its installments
-    ], 201);
-}
-
-// public function update(Request $request, $id)
-// {
-//     // Log::info('Updating a liability', ['liability_id' => $id]);
-//     $liability = Liability::findOrFail($id);
-
-//     $validated = $request->validate([
-//         // ...
-//     ]);
-
-//     $liability->update($validated);
-
-//     Log::info('Liability updated successfully', ['liability_id' => $id]);
-
-//     return response()->json([
-//         'message' => 'Liability updated successfully',
-//         'data' => $liability
-//     ]);
-// }
-
-// public function destroy($id)
-// {
-//     Log::info('Deleting a liability', ['liability_id' => $id]);
-//     $liability = Liability::findOrFail($id);
-
-//     $liability->delete();
-
-//     Log::info('Liability deleted successfully', ['liability_id' => $id]);
-
-//     return response()->json([
-//         'message' => 'Liability deleted successfully'
-//     ]);
-// }
-
-// public function getMonthlyReport(Request $request)
-// {
-//     Log::info('Getting monthly report');
-//     $request->validate([
-//         // ...
-//     ]);
-
-//     // ...
-// }
-
-// public function getMonthlyReportv2(Request $request)
-// {
-//     Log::info('Getting monthly report v2');
-//     $request->validate([
-//         //$user->id,
-//             'total_amount' => $validated['amount'],
-//             'description' => $validated['description'],
-//             'type' => $validated['type'],
-//         ]);
-
-//         // If the type is installment, create the installment records
-//         if ($validated['type'] === 'installment') {
-//             foreach ($validated['installments'] as $installment) {
-//                 Installment::create([
-//                     'liability_id' => $liability->id,
-//                     'user_id' => $ $userId,
-//                     'amount' => $installment['amount'],
-//                     'due_date' => $installment['due_date'],
-//                     'status' => $installment['status'],
-//                 ]);
-//             }
-//         }
-
-//         return response()->json([
-//             'message' => 'Liability added successfully',
-//             'data' => $liability->load('installments'), // Return liability with its installments
-//         ], 201);
-//     }
 
     /**
      * Update a liability.
@@ -301,3 +212,5 @@ public function store(Request $request)
         }
 
     }
+
+
