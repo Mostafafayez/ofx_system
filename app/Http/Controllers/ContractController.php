@@ -109,20 +109,41 @@ class ContractController extends Controller
     // Get all contracts for the authenticated user
     public function getContractss()
     {
+
         $contracts = Contract::
-        with(['client', 'services'])
-        ->get();
+            with(['client', 'services','collections'])
+            ->get();
 
-    foreach ($contracts as $contract) {
-        foreach ($contract->services as $service) {
-            echo $service->pivot->layouts;
-        }
-    }
-    foreach ($contract->contractServiceLayouts as $layout) {
-        echo $layout;
-    }
 
-        return response()->json($contracts,$layout);
+        $contractsData = $contracts->map(function ($contract) {
+
+            $contractData = $contract->toArray();
+
+            $servicesWithLayouts = $contract->services->map(function ($service) use ($contract) {
+
+                $serviceLayouts = $contract->contractServiceLayouts->filter(function ($layout) use ($service) {
+                    return $layout->contract_service_id == $service->pivot->contract_id;
+                });
+
+              
+                $serviceData = $service->toArray();
+                $serviceData['layouts'] = $serviceLayouts->map(function ($layout) {
+             
+                    $layoutData = $layout->toArray();
+                    // $layoutData['layout_details'] = $layout->layout ? $layout->layout->toArray() : null; // Add layout details
+                    return $layoutData;
+                });
+
+                return $serviceData;
+            });
+
+            $contractData['services'] = $servicesWithLayouts;
+
+            return $contractData;
+        });
+
+        // Return the response with both the contract and layout data
+        return response()->json($contractsData);
     }
 
 
