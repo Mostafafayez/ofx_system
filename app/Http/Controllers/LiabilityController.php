@@ -46,6 +46,7 @@ public function store(Request $request)
 
     $validated = $request->validate([
         'amount' => 'required|numeric',
+        'type' => 'required|string|max:255',
         'description' => 'required|string',
         'installments' => 'required|array',
         'installments' => 'required_if:type,installment|array', // Validate installments only if type is installment
