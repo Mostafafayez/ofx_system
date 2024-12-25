@@ -10,7 +10,7 @@ class Liability extends Model
 {
     use HasFactory ,SoftDeletes;
 
-    protected $fillable = ['user_id', 'amount', 'type','description'];
+    protected $fillable = ['user_id', 'total_amount', 'type' ,'description'];
 
     public function installments()
     {
