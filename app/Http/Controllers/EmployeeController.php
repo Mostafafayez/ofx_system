@@ -31,7 +31,7 @@ class EmployeeController extends Controller
             return response()->json(['message' => 'Permission denied: Only owners'], 403);
         }
 
-        $user = user::all();
+        $user = user::with('teams','department','salaries')->all();
         return response()->json($user);
     }
 
