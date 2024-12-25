@@ -109,8 +109,8 @@ class ContractController extends Controller
     // Get all contracts for the authenticated user
     public function getContractss()
     {
-        $contracts = Contract::where('sales_employee_id', Auth::id())
-        ->with(['client', 'services'])
+        $contracts = Contract::
+        with(['client', 'services'])
         ->get();
 
     foreach ($contracts as $contract) {

@@ -123,6 +123,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('contracts')->group(function () {
 
         Route::post('/', [ContractController::class, 'createContract']);
+        Route::get('/', [ContractController::class, 'getContractss']);
         Route::get('/user', [ContractController::class, 'getContracts']);
         Route::get('/{id}', [ContractController::class, 'getContractDetails']);
         Route::post('/{id}', [ContractController::class, 'updateContract']);
