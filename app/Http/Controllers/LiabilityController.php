@@ -28,20 +28,24 @@ class LiabilityController extends Controller
      */
     public function store(Request $request)
     {
+
+        $user = auth()->user();
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
+    
             'amount' => 'required|numeric',
             'type' => 'required|string|max:255',
+            'description' =>'required|string|max:2024',
             'installments' => 'required_if:type,installment|array', // Validate installments only if type is installment
             'installments.*.amount' => 'required_if:type,installment|numeric',
             'installments.*.due_date' => 'required_if:type,installment|date',
             'installments.*.status' => 'required_if:type,installment|string|max:255',
         ]);
-
+        $userId = $user->id;
         // Create the liability
         $liability = Liability::create([
-            'user_id' => $validated['user_id'],
-            'amount' => $validated['amount'],
+            'user_id' => $userId,
+            'total_amount' => $validated['amount'],
+            'description' => $validated['description'],
             'type' => $validated['type'],
         ]);
 
@@ -50,7 +54,7 @@ class LiabilityController extends Controller
             foreach ($validated['installments'] as $installment) {
                 Installment::create([
                     'liability_id' => $liability->id,
-                    'user_id' => $validated['user_id'],
+                    'user_id' => $ $userId,
                     'amount' => $installment['amount'],
                     'due_date' => $installment['due_date'],
                     'status' => $installment['status'],
