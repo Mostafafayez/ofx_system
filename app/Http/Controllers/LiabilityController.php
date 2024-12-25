@@ -28,16 +28,16 @@ class LiabilityController extends Controller
      */
 // ...
 
-public function index()
-{
-    // Log::info('Getting all liabilities');
-    $liabilities = Liability::with('user', 'installments')->get();
+// public function index()
+// {
+//     // Log::info('Getting all liabilities');
+//     $liabilities = Liability::with('user', 'installments')->get();
 
-    return response()->json([
-        'message' => 'Liabilities retrieved successfully',
-        'data' => $liabilities
-    ]);
-}
+//     return response()->json([
+//         'message' => 'Liabilities retrieved successfully',
+//         'data' => $liabilities
+//     ]);
+// }
 
 public function store(Request $request)
 {
@@ -78,77 +78,77 @@ public function store(Request $request)
     ], 201);
 }
 
-public function update(Request $request, $id)
-{
-    Log::info('Updating a liability', ['liability_id' => $id]);
-    $liability = Liability::findOrFail($id);
+// public function update(Request $request, $id)
+// {
+//     // Log::info('Updating a liability', ['liability_id' => $id]);
+//     $liability = Liability::findOrFail($id);
 
-    $validated = $request->validate([
-        // ...
-    ]);
+//     $validated = $request->validate([
+//         // ...
+//     ]);
 
-    $liability->update($validated);
+//     $liability->update($validated);
 
-    Log::info('Liability updated successfully', ['liability_id' => $id]);
+//     Log::info('Liability updated successfully', ['liability_id' => $id]);
 
-    return response()->json([
-        'message' => 'Liability updated successfully',
-        'data' => $liability
-    ]);
-}
+//     return response()->json([
+//         'message' => 'Liability updated successfully',
+//         'data' => $liability
+//     ]);
+// }
 
-public function destroy($id)
-{
-    Log::info('Deleting a liability', ['liability_id' => $id]);
-    $liability = Liability::findOrFail($id);
+// public function destroy($id)
+// {
+//     Log::info('Deleting a liability', ['liability_id' => $id]);
+//     $liability = Liability::findOrFail($id);
 
-    $liability->delete();
+//     $liability->delete();
 
-    Log::info('Liability deleted successfully', ['liability_id' => $id]);
+//     Log::info('Liability deleted successfully', ['liability_id' => $id]);
 
-    return response()->json([
-        'message' => 'Liability deleted successfully'
-    ]);
-}
+//     return response()->json([
+//         'message' => 'Liability deleted successfully'
+//     ]);
+// }
 
-public function getMonthlyReport(Request $request)
-{
-    Log::info('Getting monthly report');
-    $request->validate([
-        // ...
-    ]);
+// public function getMonthlyReport(Request $request)
+// {
+//     Log::info('Getting monthly report');
+//     $request->validate([
+//         // ...
+//     ]);
 
-    // ...
-}
+//     // ...
+// }
 
-public function getMonthlyReportv2(Request $request)
-{
-    Log::info('Getting monthly report v2');
-    $request->validate([
-        //$user->id,
-            'total_amount' => $validated['amount'],
-            'description' => $validated['description'],
-            'type' => $validated['type'],
-        ]);
+// public function getMonthlyReportv2(Request $request)
+// {
+//     Log::info('Getting monthly report v2');
+//     $request->validate([
+//         //$user->id,
+//             'total_amount' => $validated['amount'],
+//             'description' => $validated['description'],
+//             'type' => $validated['type'],
+//         ]);
 
-        // If the type is installment, create the installment records
-        if ($validated['type'] === 'installment') {
-            foreach ($validated['installments'] as $installment) {
-                Installment::create([
-                    'liability_id' => $liability->id,
-                    'user_id' => $ $userId,
-                    'amount' => $installment['amount'],
-                    'due_date' => $installment['due_date'],
-                    'status' => $installment['status'],
-                ]);
-            }
-        }
+//         // If the type is installment, create the installment records
+//         if ($validated['type'] === 'installment') {
+//             foreach ($validated['installments'] as $installment) {
+//                 Installment::create([
+//                     'liability_id' => $liability->id,
+//                     'user_id' => $ $userId,
+//                     'amount' => $installment['amount'],
+//                     'due_date' => $installment['due_date'],
+//                     'status' => $installment['status'],
+//                 ]);
+//             }
+//         }
 
-        return response()->json([
-            'message' => 'Liability added successfully',
-            'data' => $liability->load('installments'), // Return liability with its installments
-        ], 201);
-    }
+//         return response()->json([
+//             'message' => 'Liability added successfully',
+//             'data' => $liability->load('installments'), // Return liability with its installments
+//         ], 201);
+//     }
 
     /**
      * Update a liability.
