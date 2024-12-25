@@ -43,7 +43,7 @@ class LiabilityController extends Controller
         $userId = $user->id;
         // Create the liability
         $liability = Liability::create([
-            'user_id' => $userId,
+            'user_id' => $user->id,
             'total_amount' => $validated['amount'],
             'description' => $validated['description'],
             'type' => $validated['type'],
