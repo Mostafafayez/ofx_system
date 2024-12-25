@@ -111,7 +111,7 @@ class ContractController extends Controller
     {
 
         $contracts = Contract::
-            with(['client', 'services','collections'])
+            with(['client', 'services','collections','salesEmployee'])
             ->get();
 
 
@@ -138,11 +138,12 @@ class ContractController extends Controller
             });
 
             $contractData['services'] = $servicesWithLayouts;
+            $contractData['sales_employee'] = $contract->salesEmployee ? $contract->salesEmployee->toArray() : null;
+
 
             return $contractData;
         });
 
-        // Return the response with both the contract and layout data
         return response()->json($contractsData);
     }
 
