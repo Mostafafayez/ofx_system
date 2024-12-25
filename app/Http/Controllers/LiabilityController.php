@@ -43,9 +43,17 @@ public function store(Request $request)
 {
     // Log::info('Creating a new liability');
     $user = auth()->user();
+
     $validated = $request->validate([
-        // ...
+        'amount' => 'required|numeric',
+        'description' => 'required|string',
+        'installments' => 'required|array',
+        'installments' => 'required_if:type,installment|array', // Validate installments only if type is installment
+        'installments.*.amount' => 'required_if:type,installment|numeric',
+        'installments.*.due_date' => 'required_if:type,installment|date',
+        'installments.*.status' => 'required_if:type,installment|string|max:255',
     ]);
+
 
     // Create the liability
     $liability = Liability::create([
