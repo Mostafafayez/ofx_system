@@ -105,11 +105,11 @@ public function getCollectionsGroupedBySalesEmployeeUsingRelation()
         })
         ->map(function ($group) {
             return $group->groupBy(function ($item) {
-                // Ensure that 'date' is a Carbon instance before calling format()
-                $date = \Carbon\Carbon::parse($item->date);  // Parse the date to Carbon
+ 
+                $date = \Carbon\Carbon::parse($item->date);  
                 return [
-                    'year' => $date->format('Y'), // Format year
-                    'month' => $date->format('m'), // Format month
+                    'year' => $date->format('Y'), 
+                    'month' => $date->format('m'), 
                 ];
             })->map(function ($subgroup) {
                 return [
@@ -130,7 +130,7 @@ public function getCollectionsGroupedBySalesEmployeeUsingRelation()
         })
         ->map(function ($group) {
             return $group->groupBy(function ($item) {
-                // Ensure that 'date' is a Carbon instance before calling format()
+
                 $date = \Carbon\Carbon::parse($item->date);  // Parse the date to Carbon
                 return $date->format('Y'); // Group by year
             })->map(function ($subgroup) {

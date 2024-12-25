@@ -22,6 +22,23 @@ class EmployeeController extends Controller
     // }
 
 
+    public function getAllusers()
+    {
+        $user = auth()->user();
+
+
+        if (!$user->hasRole('owner')) {
+            return response()->json(['message' => 'Permission denied: Only owners'], 403);
+        }
+
+        $user = user::all();
+        return response()->json($user);
+    }
+
+
+
+
+
 
     public function getAllRoles()
     {
@@ -55,7 +72,7 @@ class EmployeeController extends Controller
     {
         $user = auth()->user();
 
-        // Check for the required permissions
+        // // Check for the required permissions
         if (!$user->hasRole('owner') && !$user->can('addemployee')) {
             return response()->json(['message' => 'Permission denied: Only owners or users with the addemployee permission can create users.'], 403);
         }

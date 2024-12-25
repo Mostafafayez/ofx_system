@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,7 +33,7 @@ class User extends Authenticatable
         'team_id',
         'department_id',
         'National_id',
-        'manager_id'
+  
 
     ];
 
@@ -59,9 +60,16 @@ class User extends Authenticatable
         ];
     }
 
-    public function teams()
+
+    public function contracts()
     {
-        return $this->belongsToMany(Team::class, 'manager_team', 'user_id', 'team_id')->withTimestamps();
+        return $this->hasMany(Contract::class, 'sales_employee_id');
+    }
+
+
+    public function teams()//for manager 
+    {
+        return $this->belongsToMany(Team::class, 'manager_team', 'user_id', 'team_id');
     }
 
     public function leads_notes(): HasManyThrough
@@ -81,10 +89,10 @@ class User extends Authenticatable
         return $this->hasManyThrough(Note::class, Task::class,'assigned_id','notable_id');
     }
 
-    public function manager()
-    {
-        return $this->belongsTo(User::class, 'manager_id');
-    }
+    // public function manager()
+    // {
+    //     return $this->belongsTo(User::class, 'manager_id');
+    // }
 
 
     public function department()

@@ -27,10 +27,11 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-        Route::post('/login', [EmployeeController::class, 'login']);
+Route::post('/login', [EmployeeController::class, 'login']);
 //Manage-Employee
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/{id}', [EmployeeController::class, 'updateUser']);
+    Route::get('/', [EmployeeController::class, 'getallusers']);
     Route::post('/add_employee', [EmployeeController::class, 'register']);
     Route::delete('/user/{id}', [EmployeeController::class, 'deleteUser']);
     Route::post('/user/{id}/password', [EmployeeController::class, 'updatePassword']);
@@ -48,13 +49,13 @@ Route::middleware('auth:sanctum')->prefix('managers')->group(function () {
     Route::get('/{id}', [ManagerController::class, 'getManagerById']);
     Route::delete('/{id}', [ManagerController::class, 'deleteManager']);
 });
-
-
+Route::get('/contracts', [ManagerController::class, 'getTeamContracts']);
+Route::get('/collection', [ManagerController::class, 'getTeamcollection']);
 
 Route::middleware('auth:sanctum')->group(function () {
-Route::delete('/users/{id}/delete', [EmployeeController::class, 'softDeleteUser']);
-Route::patch('/users/{id}/restore', [EmployeeController::class, 'restoreUser']);
-Route::get('/users/birth-month', [EmployeeController::class, 'getUsersByBirthMonth']);
+    Route::delete('/users/{id}/delete', [EmployeeController::class, 'softDeleteUser']);
+    Route::patch('/users/{id}/restore', [EmployeeController::class, 'restoreUser']);
+    Route::get('/users/birth-month', [EmployeeController::class, 'getUsersByBirthMonth']);
 });
 
 //add role"owner"
@@ -63,21 +64,14 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 //sales //leads
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/leads/create', [LeadsController::class, 'create']);//with check
 
+    Route::post('/leads/create', [LeadsController::class, 'create']); //with check
     Route::get('/leads/{id}/check-followup', [LeadsController::class, 'checkFollowUp']);
-
     Route::post('/leads/{id}/status', [LeadsController::class, 'updateStatus']);
-
-
 
     Route::get('leads/user', [LeadsController::class, 'getLeadsWithDetails']);
     Route::get('leads/filter_status/{status}', [LeadsController::class, 'filterLeadsByStatus']);
     Route::get('leads/all/filter_status/{status}', [LeadsController::class, 'filterallLeadsByStatus']);
-
-
-
-
 });
 
 Route::middleware('auth:sanctum')->prefix('offers')->group(function () {
@@ -119,62 +113,54 @@ Route::middleware(['auth:sanctum'])->prefix('services')->group(function () {
     Route::post('/', [ServiceController::class, 'store']);
     Route::post('/{id}', [ServiceController::class, 'update']);
     Route::delete('/{id}', [ServiceController::class, 'destroy']);
-
 });
 
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    // Contract
+    Route::prefix('contracts')->group(function () {
 
-// Contract
-Route::prefix('contracts')->group(function () {
+        Route::post('/', [ContractController::class, 'createContract']);
+        Route::get('/user', [ContractController::class, 'getContracts']);
+        Route::get('/{id}', [ContractController::class, 'getContractDetails']);
+        Route::post('/{id}', [ContractController::class, 'updateContract']);
+        Route::delete('/{id}', [ContractController::class, 'deleteContract']);
+        //team-leader
 
-    Route::post('/', [ContractController::class, 'createContract']);
-    Route::get('/user', [ContractController::class, 'getContracts']);
-    Route::get('/{id}', [ContractController::class, 'getContractDetails']);
-    Route::post('/{id}', [ContractController::class, 'updateContract']);
-    Route::delete('/{id}', [ContractController::class, 'deleteContract']);
-    //team-leader
+        // Services and Layouts getTeamcollection
+        Route::get('/{contractId}/services', [ContractController::class, 'getServicesByContract']);
+        Route::get('/sales', [ContractController::class, 'getAllCollectionsBySales']);
 
-    // Services and Layouts
-    Route::get('/{contractId}/services', [ContractController::class, 'getServicesByContract']);
-    Route::get('/sales', [ContractController::class, 'getAllCollectionsBySales']);
-
-    // Route::get('/my-team', [CollectionController::class, 'getTeamContracts']);
-});
-// Collection
-Route::prefix('collections')->group(function () {
-    Route::post('/', [ContractController::class, 'addCollection']);
-    Route::get('/service/{serviceId}', [ContractController::class, 'getCollectionsByService']);
-    Route::get('/user/{userId}', [ContractController::class, 'getCollectionsByUser']);
-    Route::get('/sales/{salesId}', [ContractController::class, 'getCollectionsBySales']);
-});
-
-
+        // Route::get('/my-team', [CollectionController::class, 'getTeamContracts']);
+    });
+    // Collection
+    Route::prefix('collections')->group(function () {
+        Route::post('/', [ContractController::class, 'addCollection']);
+        Route::get('/service/{serviceId}', [ContractController::class, 'getCollectionsByService']);
+        Route::get('/user/{userId}', [ContractController::class, 'getCollectionsByUser']);
+        Route::get('/sales/{salesId}', [ContractController::class, 'getCollectionsBySales']);
+    });
 });
 
 Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/contracts', action: [CollectionController::class, 'getTeamContracts']);
     Route::get('/collections/{contract_id}', action: [CollectionController::class, 'getTeamcollections']);
-
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('layouts', LayoutController::class);
-
 });
 
 
 // APIS FOR  OWNER ONLY
 Route::middleware(['auth:sanctum'])->group(function () {
 
-   Route::get('collections/sales', [CollectionController::class, 'getAllCollectionsBySales']);
+    Route::get('collections/sales', [CollectionController::class, 'getAllCollectionsBySales']);
     // for Status updated and tasks auto-assigned
-   Route::post('/contract/status/{id}', [TaskController::class, 'updateStatus']);
-
-
+    Route::post('/contract/status/{id}', [TaskController::class, 'updateStatus']);
 });
 
 
@@ -194,9 +180,7 @@ Route::middleware('auth:sanctum')->get('/collections', [CollectionController::cl
 
 Route::middleware('auth:sanctum')->get('/sales-employees', [CollectionController::class, 'getAllSalesEmployeesWithCollections']);
 
-Route::middleware('auth:sanctum')->group(function () {
-
-});
+Route::middleware('auth:sanctum')->group(function () {});
 
 //Teams
 
@@ -212,7 +196,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/teamleader/members', [TeamController::class, 'getTeamLeaderMembers']);
     Route::middleware('role:manager')->get('/teams/members', [TeamController::class, 'getAllTeamsByType']);
     Route::get('/my-teama', [TeamController::class, 'getMyTeamAndLeader']);
-
 });
 
 
@@ -224,7 +207,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tasks', [TaskController::class, 'getUserTasks']);
     Route::get('/admin/tasks', [TaskController::class, 'getAllTasks']);
     Route::patch('/tasks/{task_id}/status', [TaskController::class, 'updateTaskStatus']);
-
 });
 
 Route::get('/mytasks', [TaskController::class, 'getAllTaskss']);
@@ -237,18 +219,14 @@ Route::prefix('notes')->middleware('auth:sanctum')->group(function () {
     Route::post('/create', [NoteController::class, 'createNote']);
     Route::get('/{notable_id}', [NoteController::class, 'getNote']);
     Route::get('/', [NoteController::class, 'getAllNotes']);
-    Route::delete('/{id}', [NoteController::class, 'deleteNote']);
-;
-
-
+    Route::delete('/{id}', [NoteController::class, 'deleteNote']);;
 });
 
 Route::prefix('notes/user')->middleware('auth:sanctum')->group(function () {
     Route::get('/private', [NoteController::class, 'getNotes_user']);
-Route::get('/leads', [NoteController::class, 'getNotes_leads']);
-Route::get('/contract', [NoteController::class, 'getNotes_Contracts']);
-Route::get('/task', [NoteController::class, 'getNotes_tasks']);
-
+    Route::get('/leads', [NoteController::class, 'getNotes_leads']);
+    Route::get('/contract', [NoteController::class, 'getNotes_Contracts']);
+    Route::get('/task', [NoteController::class, 'getNotes_tasks']);
 });
 
 Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
@@ -257,7 +235,6 @@ Route::middleware(['auth:sanctum', 'role:owner'])->group(function () {
     Route::post('/liabilities', [LiabilityController::class, 'store']);
     Route::put('/liabilities/{id}', [LiabilityController::class, 'update']);
     Route::delete('/liabilities/{id}', [LiabilityController::class, 'destroy']);
-
 });
 
 
@@ -267,27 +244,24 @@ Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [PriceListController::class, 'getAll']);
 
     Route::middleware('role:owner')->group(function () {
-    Route::post('/', [PriceListController::class, 'store']);
-    Route::put('/{id}', [PriceListController::class, 'update']);
-    Route::delete('/{id}', [PriceListController::class, 'delete']);
+
+        Route::post('/', [PriceListController::class, 'store']);
+        Route::put('/{id}', [PriceListController::class, 'update']);
+        Route::delete('/{id}', [PriceListController::class, 'delete']);
+    });
 });
 
-});
-Route::post('/testwwww', [PriceListController::class, 'store']);
 
-
-Route::prefix('dashboard')->middleware(['auth:sanctum','role:owner'])->group(function () {
-//owner
+Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
+    //owner
     Route::get('/grouped-by-date', [OwnerDashboardController::class, 'getCollectionsGroupedByMonthAndYear']);
     Route::get('/grouped-by-sales-employee', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeUsingRelation']);
     Route::get('/grouped-by-Service', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeAndService']);
-
 });
 
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
 
     Route::get('/collection/filter', [UserFilterationController::class, 'getCollectionsGroupedByAuthUser']);
-
 });
 
 Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
@@ -295,7 +269,6 @@ Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
     Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
     Route::post('/technical', [SalaryController::class, 'calculateTechnicalSalaries']);
     Route::post('/employee', [SalaryController::class, 'addSalary']);
-
 });
 
 

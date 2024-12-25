@@ -21,7 +21,7 @@ return new class extends Migration
 
             // Foreign key constraints
             $table->foreign('service_id')->references('id')->on('services')->onDelete('set null');
-            $table->foreign( 'team_leader_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign( 'teamleader_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

@@ -28,6 +28,24 @@ class Team extends Model
         return $this->hasManyThrough(Contract::class, User::class, 'team_id', 'sales_employee_id');
     }
 
+
+    
+
+    public function team_contracts()
+    {
+        return $this->hasManyThrough(
+            Contract::class,   
+            Team::class,       
+            'manager_team.user_id',  
+            'user_id',              
+            'id',                  
+            'id'                      
+        );
+    }
+
+    // hint manager and teams are users  , and each team have team leader , team memeber 
+    // create api o get  team contract  by manager-id auth-user
+
     public function service()
     {
         return $this->belongsTo(Service::class);
