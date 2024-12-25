@@ -12,14 +12,43 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\ContractServices;
+use Illuminate\Http\JsonResponse;
 class ContractController extends Controller
 {
     use AuthorizesRequests;
 
-    public function __construct()
+    protected ContractServices $contractServices;
+
+    public function __construct(ContractServices $contractServices)
     {
+        $this->contractServices = $contractServices;
+
 
         $this->authorize('access-sales');
+    }
+
+    /**
+     * Get contracts based on the user's role.
+     *
+     * @return JsonResponse
+     */
+    public function getContract(): JsonResponse
+    {
+        try {
+            $contracts = $this->contractServices->getContractsByRole();
+
+            return response()->json([
+                'success' => true,
+                'data' => $contracts,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve contracts.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
@@ -107,45 +136,45 @@ class ContractController extends Controller
     }
 
     // Get all contracts for the authenticated user
-    public function getContractss()
-    {
+    // public function getContractss()
+    // {
 
-        $contracts = Contract::
-            with(['client', 'services','collections','salesEmployee'])
-            ->get();
-
-
-        $contractsData = $contracts->map(function ($contract) {
-
-            $contractData = $contract->toArray();
-
-            $servicesWithLayouts = $contract->services->map(function ($service) use ($contract) {
-
-                $serviceLayouts = $contract->contractServiceLayouts->filter(function ($layout) use ($service) {
-                    return $layout->contract_service_id == $service->pivot->contract_id;
-                });
-
-              
-                $serviceData = $service->toArray();
-                $serviceData['layouts'] = $serviceLayouts->map(function ($layout) {
-             
-                    $layoutData = $layout->toArray();
-                    // $layoutData['layout_details'] = $layout->layout ? $layout->layout->toArray() : null; // Add layout details
-                    return $layoutData;
-                });
-
-                return $serviceData;
-            });
-
-            $contractData['services'] = $servicesWithLayouts;
-            $contractData['sales_employee'] = $contract->salesEmployee ? $contract->salesEmployee->toArray() : null;
+    //     $contracts = Contract::
+    //         with(['client', 'services','collections','salesEmployee'])
+    //         ->get();
 
 
-            return $contractData;
-        });
+    //     $contractsData = $contracts->map(function ($contract) {
 
-        return response()->json($contractsData);
-    }
+    //         $contractData = $contract->toArray();
+
+    //         $servicesWithLayouts = $contract->services->map(function ($service) use ($contract) {
+
+    //             $serviceLayouts = $contract->contractServiceLayouts->filter(function ($layout) use ($service) {
+    //                 return $layout->contract_service_id == $service->pivot->contract_id;
+    //             });
+
+
+    //             $serviceData = $service->toArray();
+    //             $serviceData['layouts'] = $serviceLayouts->map(function ($layout) {
+
+    //                 $layoutData = $layout->toArray();
+    //                 // $layoutData['layout_details'] = $layout->layout ? $layout->layout->toArray() : null; // Add layout details
+    //                 return $layoutData;
+    //             });
+
+    //             return $serviceData;
+    //         });
+
+    //         $contractData['services'] = $servicesWithLayouts;
+    //         $contractData['sales_employee'] = $contract->salesEmployee ? $contract->salesEmployee->toArray() : null;
+
+
+    //         return $contractData;
+    //     });
+
+    //     return response()->json($contractsData);
+    // }
 
 
     public function getContracts()

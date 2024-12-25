@@ -33,7 +33,7 @@ class User extends Authenticatable
         'team_id',
         'department_id',
         'National_id',
-  
+
 
     ];
 
@@ -67,10 +67,21 @@ class User extends Authenticatable
     }
 
 
-    public function teams()//for manager 
+    public function teams()//for manager
     {
         return $this->belongsToMany(Team::class, 'manager_team', 'user_id', 'team_id');
     }
+
+    public function team()//team
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function leader()
+    {
+        return $this->hasOne(Team::class, 'teamleader_id');
+    }
+
 
     public function leads_notes(): HasManyThrough
     {
@@ -89,10 +100,7 @@ class User extends Authenticatable
         return $this->hasManyThrough(Note::class, Task::class,'assigned_id','notable_id');
     }
 
-    // public function manager()
-    // {
-    //     return $this->belongsTo(User::class, 'manager_id');
-    // }
+
 
 
     public function department()
@@ -100,10 +108,6 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
-    public function team()
-    {
-        return $this->belongsTo(Team::class);
-    }
 
 
     public function services()

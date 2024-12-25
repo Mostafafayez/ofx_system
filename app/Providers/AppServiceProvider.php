@@ -6,7 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
-
+use App\Services\ContractServices;
+use App\Services\CollectionService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(ContractServices::class, function ($app) {
+            return new ContractServices();
+        });
+
+        $this->app->singleton(CollectionService::class, function ($app) {
+            return new CollectionService();
+        });
     }
 
     /**

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Team extends Model
 {
     use HasFactory;
-
+protected $tabele='teams';
     protected $fillable = ['name', 'teamleader_id','service_id','branch'];
 
 
@@ -29,21 +29,21 @@ class Team extends Model
     }
 
 
-    
+
 
     public function team_contracts()
     {
         return $this->hasManyThrough(
-            Contract::class,   
-            Team::class,       
-            'manager_team.user_id',  
-            'user_id',              
-            'id',                  
-            'id'                      
+            Contract::class,
+            Team::class,
+            'manager_team.user_id',
+            'user_id',
+            'id',
+            'id'
         );
     }
 
-    // hint manager and teams are users  , and each team have team leader , team memeber 
+    // hint manager and teams are users  , and each team have team leader , team memeber
     // create api o get  team contract  by manager-id auth-user
 
     public function service()
@@ -61,6 +61,12 @@ class Team extends Model
     }
 
     public function teamLeader()
+    {
+        return $this->belongsTo(User::class, 'teamleader_id');
+    }
+
+
+    public function leader()
     {
         return $this->belongsTo(User::class, 'teamleader_id');
     }

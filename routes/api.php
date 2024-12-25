@@ -11,6 +11,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\OwnerDashboardController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\userDashboardController;
 use App\Http\Controllers\UserFilterationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -123,7 +124,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('contracts')->group(function () {
 
         Route::post('/', [ContractController::class, 'createContract']);
-        Route::get('/', [ContractController::class, 'getContractss']);
+        Route::get('/', [ContractController::class, 'getContract']);
         Route::get('/user', [ContractController::class, 'getContracts']);
         Route::get('/{id}', [ContractController::class, 'getContractDetails']);
         Route::post('/{id}', [ContractController::class, 'updateContract']);
@@ -176,7 +177,7 @@ Route::prefix('collection')->middleware('auth:sunctum')->group(function () {
 });
 Route::middleware('auth:sanctum')->get('/sales', [CollectionController::class, 'getCollectionsByAuthUser']);
 
-Route::middleware('auth:sanctum')->get('/collections', [CollectionController::class, 'getCollections']);
+Route::middleware('auth:sanctum')->get('/collections', [CollectionController::class, 'getCollectionss']);
 
 
 Route::middleware('auth:sanctum')->get('/sales-employees', [CollectionController::class, 'getAllSalesEmployeesWithCollections']);
@@ -288,3 +289,8 @@ Route::post('/monthly-report', [LiabilityController::class, 'getMonthlyReportv2'
 
 
 Route::post('/report', [BonusController::class, 'getMonthlyReportv2']);
+
+
+
+
+Route::middleware('auth:sanctum')->get('/user/team', [userDashboardController::class, 'getTeamId']);

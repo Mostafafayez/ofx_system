@@ -6,10 +6,23 @@ use App\Models\Collection;
 use App\Models\Contract;
 use App\Models\Team;
 use Illuminate\Http\Request;
+use App\Services\CollectionService;
+use Illuminate\Http\JsonResponse;
 
 class CollectionController extends Controller
 {
-    public function getAllCollectionsBySales()
+    protected CollectionService $collectionService;
+
+    /**
+     * CollectionController constructor.
+     *
+     * @param CollectionService $collectionService
+     */
+    public function __construct(CollectionService $collectionService)
+    {
+        $this->collectionService = $collectionService;
+
+    }    public function getAllCollectionsBySales()
     {
 
         $user = auth()->user();
@@ -45,6 +58,25 @@ class CollectionController extends Controller
             });
 
         return response()->json($collectionsBySales);
+    }
+
+
+    public function getCollectionss(): JsonResponse
+    {
+        try {
+            $collections = $this->collectionService->getCollectionsByRole();
+
+            return response()->json([
+                'success' => true,
+                'data' => $collections,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve collections.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
