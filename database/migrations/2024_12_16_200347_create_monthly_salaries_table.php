@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('year');
             $table->decimal('total_sales', 10, 2);
             $table->decimal('net_salary', 10, 2);
+            $table->decimal('bonus_amount', 10, 2);
             $table->timestamps();
 
 
