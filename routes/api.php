@@ -141,7 +141,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('collections')->group(function () {
         Route::post('/', [ContractController::class, 'addCollection']);
         Route::get('/service/{serviceId}', [ContractController::class, 'getCollectionsByService']);
-        Route::get('/user/{userId}', [ContractController::class, 'getCollectionsByUser']);
+        Route::get('/user', [ContractController::class, 'getCollectionsByUser']);
         Route::get('/sales/{salesId}', [ContractController::class, 'getCollectionsBySales']);
     });
 });
