@@ -120,10 +120,7 @@ public function calculateAllSalesSalaries(Request $request)
         $month = $request->month;
         $year = $request->year;
 
-        $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
 
-        // Format valid_month as 'YYYY-MM'
-        $validMonth = "$year-$formattedMonth";
 
         // Fetch all users in sales department
         $users = User::where('department_id', 1)->get();
