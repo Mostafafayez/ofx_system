@@ -161,9 +161,14 @@ public function calculateAllSalesSalaries(Request $request)
                 $netSalary = $salaryCases->first()->base_salary ?? 0;
             }
 
+            $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
+
+            // Use the formatted month and year for the comparison
+            $validMonth = "$year-$formattedMonth";
+
             // Check for Bonus Eligibility
             $bonus = Bonus::where('department_id', 1)
-                ->where('valid_month', "$year-$month")
+            ->where('valid_month', $validMonth)
                 ->where('status', 'active')
                 ->get();
 
@@ -232,6 +237,12 @@ public function calculateAllSalesSalaries(Request $request)
         $year = $request->year;
 
 
+        $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
+
+        // Format valid_month as 'YYYY-MM'
+        $validMonth = "$year-$formattedMonth";
+
+
         $users = User::where('department_id', '!=', 1)->get();
         $results = [];
 
@@ -246,7 +257,7 @@ public function calculateAllSalesSalaries(Request $request)
 
 
             $bonuses = Bonus::where('department_id', $user->department_id)
-                ->where('valid_month', "$year-$month")
+                ->where('valid_month', 'like', "$validMonth%")
                 ->where('status', 'active')
                 ->get();
 
