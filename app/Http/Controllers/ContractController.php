@@ -87,7 +87,7 @@ class ContractController extends Controller
             // Step 1: Add or find the client
             $client = Client::updateOrCreate(
                 ['phone' => $request->client['phone']],
-                ['name' => $request->client['name'], 'email' => $request->client['email']]
+                ['name' => $request->client['name'], 'email' => $request->client['email'],'company_name'=> $request->client['company_name']]
             );
 
             // Step 2: Create the contract
