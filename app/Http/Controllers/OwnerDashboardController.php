@@ -328,4 +328,42 @@ public function getTotalSalesByEmployee()
     return response()->json($formattedResult->values());
 }
 
+
+public function getTotalServicePrices()
+{
+    // Fetch all contracts with related services
+    $contracts = Contract::with(['services'])->get();
+
+    // Group services by year and month and calculate total price
+    $result = $contracts->flatMap(function ($contract) {
+        return $contract->services->map(function ($service) use ($contract) {
+            return [
+                'service_id' => $service->id,
+                'service_name' => $service->name,
+                'year' => $contract->created_at->year,
+                'month' => $contract->created_at->month,
+                'price' => $service->pivot->price,
+            ];
+        });
+    })->groupBy(['service_id', 'year'])->map(function ($groupedByYear, $serviceId) {
+        return [
+            'service_id' => $serviceId,
+            'total_by_year' => $groupedByYear->map(function ($servicesByYear, $year) {
+                $monthlyTotals = $servicesByYear->groupBy('month')->map(function ($servicesByMonth) {
+                    return $servicesByMonth->sum('price');
+                });
+
+                return [
+                    'year' => $year,
+                    'monthly_totals' => $monthlyTotals,
+                    'yearly_total' => $monthlyTotals->sum(), // Total for the year
+                ];
+            }),
+        ];
+    });
+
+    return response()->json($result->values());
+}
+
+
 }
