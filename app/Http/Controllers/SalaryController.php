@@ -158,8 +158,9 @@ public function calculateAllSalesSalaries(Request $request)
 
             // If matched salary case found
             if ($matchedCase) {
-                $netSalary = ($matchedCase->commission_percentage / 100) * $matchedCase->target + $matchedCase->base_salary;
+                $netSalary = ($matchedCase->commission_percentage / 100) *( ($matchedCase->target_percentage / 100)*$matchedCase->target) + $matchedCase->base_salary;
             } else {
+
                 $netSalary = $salaryCases->first()->base_salary ?? 0;
             }
 
