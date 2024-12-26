@@ -26,8 +26,6 @@ class Contract extends Model
             ->withTimestamps();
     }
 
-
-
     public function client()
     {
         return $this->belongsTo(Client::class);

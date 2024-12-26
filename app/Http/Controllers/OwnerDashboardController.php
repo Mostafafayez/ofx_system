@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Collection;
+use App\Models\Contract;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class OwnerDashboardController extends Controller
@@ -281,6 +282,45 @@ public function getCollectionsGroupedBySalesEmployeeAndService()
 }
 
 
+
+
+
+public function getTotalSalesByEmployee(Request $request)
+{
+    $request->validate([
+        'year' => 'required|integer|min:2000|max:' . now()->year,
+    ]);
+
+    $year = $request->year;
+
+    // Fetch total price for each sales_employee by month
+    $result = Contract::query()
+        ->whereYear('created_at', $year)
+        ->with('salesEmployee')
+        ->join('contract_services', 'contracts.id', '=', 'contract_services.contract_id')
+        ->selectRaw('sales_employee_id, MONTH(contracts.created_at) as month, SUM(contract_services.price) as total_price')
+        ->groupBy('sales_employee_id', 'month')
+        ->get();
+
+    $formattedResult = $result->groupBy('sales_employee_id')->map(function ($sales) {
+        $employeeData = [
+            'sales_employee_id' => $sales->first()->sales_employee_id,
+            'sales_employee_name' => $sales->first()->salesEmployee->name ?? 'Unknown',
+            'monthly_sales' => [],
+        ];
+
+        foreach ($sales as $sale) {
+            $employeeData['monthly_sales'][] = [
+                'month' => $sale->month,
+                'total_price' => $sale->total_price,
+            ];
+        }
+
+        return $employeeData;
+    });
+
+    return response()->json($formattedResult->values());
+}
 
 
 

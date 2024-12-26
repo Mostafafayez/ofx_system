@@ -260,6 +260,8 @@ Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(fu
     Route::get('/grouped-by-sales-employee', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeUsingRelation']);
     Route::get('/grouped-by-Service', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeAndService']);
     Route::post('/report', [BonusController::class, 'getMonthlyReportv2']);
+    Route::get('/sales-by-employee', [OwnerDashboardController::class, 'getTotalSalesByEmployee']);
+
 });
 
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
