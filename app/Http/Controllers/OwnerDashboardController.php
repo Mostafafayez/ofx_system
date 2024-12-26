@@ -338,16 +338,15 @@ public function getTotalServicePrices()
     $result = $contracts->flatMap(function ($contract) {
         return $contract->services->map(function ($service) use ($contract) {
             return [
-                'service_id' => $service->id,
                 'service_name' => $service->name,
                 'year' => $contract->created_at->year,
                 'month' => $contract->created_at->month,
                 'price' => $service->pivot->price,
             ];
         });
-    })->groupBy(['service_id', 'year'])->map(function ($groupedByYear, $serviceId) {
+    })->groupBy(['service_name', 'year'])->map(function ($groupedByYear, $serviceName) {
         return [
-            'service_id' => $serviceId,
+            'service_name' => $serviceName,
             'total_by_year' => $groupedByYear->map(function ($servicesByYear, $year) {
                 $monthlyTotals = $servicesByYear->groupBy('month')->map(function ($servicesByMonth) {
                     return $servicesByMonth->sum('price');
@@ -364,6 +363,7 @@ public function getTotalServicePrices()
 
     return response()->json($result->values());
 }
+
 
 
 }
