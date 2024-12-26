@@ -300,13 +300,14 @@ public function getCollectionsByUser(Request $request)
         'sort' => 'nullable|in:asc,desc',
     ]);
 
-    $collections = Collection::whereHas('contractService.contract', function ($query) use ($user) {
+    $collections = Collection::whereHas('contractService.contract.salesEmployee', function ($query) use ($user) {
             $query->where('sales_employee_id', $user->id);
         })
         ->when($request->status, function ($query, $status) {
             return $query->where('status', $status);
         })
         ->orderBy('date', $request->sort ?? 'asc')
+        ->with('contractService.contract.client')
         ->get();
 
     return response()->json($collections);
