@@ -259,6 +259,7 @@ Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(fu
     Route::get('/grouped-by-date', [OwnerDashboardController::class, 'getCollectionsGroupedByMonthAndYear']);
     Route::get('/grouped-by-sales-employee', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeUsingRelation']);
     Route::get('/grouped-by-Service', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeAndService']);
+    Route::post('/report', [BonusController::class, 'getMonthlyReportv2']);
 });
 
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
@@ -287,10 +288,11 @@ Route::delete('/bonuses/{id}', [BonusController::class, 'deleteBonus']);
 
 Route::post('/monthly-report', [LiabilityController::class, 'getMonthlyReportv2']);
 
-
-Route::post('/report', [BonusController::class, 'getMonthlyReportv2']);
-
+Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
 
 
+
+
+});
 
 Route::middleware('auth:sanctum')->get('/user/team', [userDashboardController::class, 'getTeamId']);
