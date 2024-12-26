@@ -170,7 +170,7 @@ public function calculateAllSalesSalaries(Request $request)
 
             // Check for Bonus Eligibility
             $bonus = Bonus::where('department_id', 1)
-            ->where('valid_month', $validMonth)
+            ->where('valid_month', 'like', "$validMonth%")
                 ->where('status', 'active')
                 ->get();
 
