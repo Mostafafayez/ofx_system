@@ -18,7 +18,8 @@ class CollectionService
 
         if ($user->hasRole('owner')) {
 
-            return Collection::with(['contractService.contract.salesEmployee'])->get();
+            return Collection::with([
+                'contractService.contract.salesEmployee'])->get();
         }
 
         if ($user->hasRole('manager')) {
@@ -26,17 +27,21 @@ class CollectionService
             $teamIds = $user->teams->pluck('id');
             return Collection::whereHas('salesEmployee', function ($query) use ($teamIds) {
                 $query->whereIn('team_id', $teamIds);
-            })->with(['contractService.contract.salesEmployee'])->get();
+            })->with([
+                'contractService.contract.salesEmployee',
+                'contractService.contract.client'
+            ])->get();
         }
 
         if ($user->hasRole('teamleader')) {
 
             $teamId = $user->leader->id;
-            return Collection::whereHas('salesEmployee', function ($query) use ($teamId) {
+            return Collection::whereHas('contractService.contract.salesEmployee', function ($query) use ($teamId) {
                 $query->where('team_id', $teamId);
-            })->with(['contractService.contract.salesEmployee'])->get();
-        }
-
+            })->with([
+                'contractService.contract.salesEmployee',
+                'contractService.contract.client'
+            ])->get();
 
 
         return collect();
