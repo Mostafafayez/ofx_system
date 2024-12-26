@@ -128,8 +128,8 @@ class BonusController extends Controller
                 'approved' => $approvedCollections,
                 'not_approved' => $notApprovedCollections,
             ],
-            'profit' => $netProfit,
-            'net_profit' => $profit,
+            'net_profit' => $netProfit,
+            'profit' => $profit,
             'deferred_profit' => $deferredProfit,
         ], 200);
     }
