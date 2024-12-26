@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Collection;
 use App\Models\Contract;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use DB;
 class OwnerDashboardController extends Controller
 {
 
@@ -293,35 +295,36 @@ public function getTotalSalesByEmployee(Request $request)
 
     $year = $request->year;
 
-    // Fetch total price for each sales_employee by month
-    $result = Contract::query()
-        ->whereYear('created_at', $year)
-        ->with('salesEmployee')
-        ->join('contract_services', 'contracts.id', '=', 'contract_services.contract_id')
-        ->selectRaw('sales_employee_id, MONTH(contracts.created_at) as month, SUM(contract_services.price) as total_price')
-        ->groupBy('sales_employee_id', 'month')
+    // Fetch total sales grouped by sales_employee_id and month
+    $salesData = DB::table('contract_services')
+        ->join('contracts', 'contract_services.contract_id', '=', 'contracts.id')
+        ->select(
+            'contracts.sales_employee_id',
+            DB::raw('MONTH(contracts.created_at) as month'),
+            DB::raw('SUM(contract_services.price) as total_price')
+        )
+        ->whereYear('contracts.created_at', $year)
+        ->groupBy('contracts.sales_employee_id', DB::raw('MONTH(contracts.created_at)'))
         ->get();
 
-    $formattedResult = $result->groupBy('sales_employee_id')->map(function ($sales) {
-        $employeeData = [
-            'sales_employee_id' => $sales->first()->sales_employee_id,
-            'sales_employee_name' => $sales->first()->salesEmployee->name ?? 'Unknown',
-            'monthly_sales' => [],
+    // Format the result to group by sales_employee_id
+    $formattedResult = $salesData->groupBy('sales_employee_id')->map(function ($sales, $salesEmployeeId) {
+        $employeeName = User::find($salesEmployeeId)->name ?? 'Unknown';
+
+        return [
+            'sales_employee_id' => $salesEmployeeId,
+            'sales_employee_name' => $employeeName,
+            'monthly_sales' => $sales->map(function ($sale) {
+                return [
+                    'month' => $sale->month,
+                    'total_price' => $sale->total_price,
+                ];
+            })->values(),
         ];
-
-        foreach ($sales as $sale) {
-            $employeeData['monthly_sales'][] = [
-                'month' => $sale->month,
-                'total_price' => $sale->total_price,
-            ];
-        }
-
-        return $employeeData;
     });
 
     return response()->json($formattedResult->values());
 }
-
 
 
 
