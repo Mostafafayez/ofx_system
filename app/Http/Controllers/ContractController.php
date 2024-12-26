@@ -293,13 +293,15 @@ class ContractController extends Controller
     // Get collections by user_id with optional status filter and sorted by date
 public function getCollectionsByUser(Request $request, $userId)
 {
+    $user = auth()->user();
+
     $request->validate([
         'status' => 'nullable|in:pending,paid',
         'sort' => 'nullable|in:asc,desc',
     ]);
 
     $collections = Collection::whereHas('contractService.contract', function ($query) use ($userId) {
-            $query->where('client_id', $userId);
+            $query->where('sales_employee_id', $user->id);
         })
         ->when($request->status, function ($query, $status) {
             return $query->where('status', $status);
