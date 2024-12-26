@@ -10,7 +10,7 @@ class Client extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'phone'];
+    protected $fillable = ['name','company_name', 'email', 'phone'];
 
     public function contracts()
     {
