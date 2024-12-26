@@ -19,7 +19,8 @@ class CollectionService
         if ($user->hasRole('owner')) {
 
             return Collection::with([
-                'contractService.contract.salesEmployee'])->get();
+                'contractService.contract.salesEmployee',
+                'contractService.contract.client'])->get();
         }
 
         if ($user->hasRole('manager')) {
@@ -46,4 +47,5 @@ class CollectionService
 
         return collect();
     }
+}
 }
