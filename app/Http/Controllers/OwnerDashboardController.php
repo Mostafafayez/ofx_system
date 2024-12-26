@@ -284,8 +284,6 @@ public function getCollectionsGroupedBySalesEmployeeAndService()
 }
 
 
-
-
 public function getTotalSalesByEmployee()
 {
     // Fetch total sales grouped by sales_employee_id, year, and month
@@ -304,26 +302,30 @@ public function getTotalSalesByEmployee()
     $formattedResult = $salesData->groupBy('sales_employee_id')->map(function ($sales, $salesEmployeeId) {
         $employeeName = User::find($salesEmployeeId)->name ?? 'Unknown';
 
+        // Group sales by year and calculate yearly total
+        $yearlySales = $sales->groupBy('year')->map(function ($yearSales, $year) {
+            $yearlyTotal = $yearSales->sum('total_price');
+
+            return [
+                'year' => $year,
+                'yearly_total' => $yearlyTotal,
+                'monthly_sales' => $yearSales->map(function ($sale) {
+                    return [
+                        'month' => $sale->month,
+                        'total_price' => $sale->total_price,
+                    ];
+                })->values(),
+            ];
+        })->values();
+
         return [
             'sales_employee_id' => $salesEmployeeId,
             'sales_employee_name' => $employeeName,
-            'yearly_sales' => $sales->groupBy('year')->map(function ($yearSales, $year) {
-                return [
-                    'year' => $year,
-                    'monthly_sales' => $yearSales->map(function ($sale) {
-                        return [
-                            'month' => $sale->month,
-                            'total_price' => $sale->total_price,
-                        ];
-                    })->values(),
-                ];
-            })->values(),
+            'yearly_sales' => $yearlySales,
         ];
     });
 
     return response()->json($formattedResult->values());
 }
-
-
 
 }
