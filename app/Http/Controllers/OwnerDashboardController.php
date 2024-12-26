@@ -286,25 +286,18 @@ public function getCollectionsGroupedBySalesEmployeeAndService()
 
 
 
-
-public function getTotalSalesByEmployee(Request $request)
+public function getTotalSalesByEmployee()
 {
-    $request->validate([
-        'year' => 'required|integer|min:2000|max:' . now()->year,
-    ]);
-
-    $year = $request->year;
-
-    // Fetch total sales grouped by sales_employee_id and month
+    // Fetch total sales grouped by sales_employee_id, year, and month
     $salesData = DB::table('contract_services')
         ->join('contracts', 'contract_services.contract_id', '=', 'contracts.id')
         ->select(
             'contracts.sales_employee_id',
+            DB::raw('YEAR(contracts.created_at) as year'),
             DB::raw('MONTH(contracts.created_at) as month'),
             DB::raw('SUM(contract_services.price) as total_price')
         )
-        ->whereYear('contracts.created_at', $year)
-        ->groupBy('contracts.sales_employee_id', DB::raw('MONTH(contracts.created_at)'))
+        ->groupBy('contracts.sales_employee_id', DB::raw('YEAR(contracts.created_at)'), DB::raw('MONTH(contracts.created_at)'))
         ->get();
 
     // Format the result to group by sales_employee_id
@@ -314,10 +307,15 @@ public function getTotalSalesByEmployee(Request $request)
         return [
             'sales_employee_id' => $salesEmployeeId,
             'sales_employee_name' => $employeeName,
-            'monthly_sales' => $sales->map(function ($sale) {
+            'yearly_sales' => $sales->groupBy('year')->map(function ($yearSales, $year) {
                 return [
-                    'month' => $sale->month,
-                    'total_price' => $sale->total_price,
+                    'year' => $year,
+                    'monthly_sales' => $yearSales->map(function ($sale) {
+                        return [
+                            'month' => $sale->month,
+                            'total_price' => $sale->total_price,
+                        ];
+                    })->values(),
                 ];
             })->values(),
         ];
