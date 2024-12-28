@@ -12,6 +12,13 @@ class MonthlySalary extends Model
         'year',
         'total_sales',
         'net_salary',
-        'bonus_amount'
+        'bonus_amount',
+        'Deduction '
     ];
+
+    protected $appends = ['total_salary'];
+    public function getTotalSalaryAttribute()
+    {
+        return $this->net_salary - $this->Deduction;
+    }
 }

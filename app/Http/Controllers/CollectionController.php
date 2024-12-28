@@ -116,7 +116,7 @@ class CollectionController extends Controller
 
         // Validate the is_approval input (boolean)
         $request->validate([
-            'is_approval' => 'required|boolean', // is_approval must be a boolean
+            'is_approval' => 'required|string',
         ]);
 
         // Update the collection's approval status
@@ -236,8 +236,92 @@ public function getTeamcollections($contract_id)
 
     return response()->json(['collections' => $collection], 200);
 }
+public function updateCollectionWithAdjustments(Request $request, $id)
+{
 
+    $request->validate([
+        'amount' => 'required|numeric|min:0',
+        'status' => 'required|string',
+        'proof_of_payment' => 'required_if:status,paid|file|max:10240',
+        'new_collection' => 'array',
+        'new_collection.amount' => 'required_with:new_collection|numeric|min:0',
+        'new_collection.date' => 'required_with:new_collection|date',
+        'new_collection.status' => 'required_with:new_collection|string',
+        'new_collection.proof_of_payment' => 'nullable|file|max:10240',
+    ]);
+
+
+    $collection = Collection::findOrFail($id);
+
+
+    if ($collection->is_approval == 'true') {
+        return response()->json([
+            'status' => 400,
+            'message' => 'This collection is approved and cannot be updated.',
+        ], 400);
+    }
+
+
+    $contractService = $collection->contractService;
+    $contractServicePrice = $contractService->price;
+
+
+    $updatedTotalCollections = $contractService->collections()
+        ->where('id', '!=', $id)
+        ->sum('amount') + $request->input('amount');
+
+    if ($request->has('new_collection')) {
+        $updatedTotalCollections += $request->input('new_collection.amount');
+    }
+
+    // Check if totals match
+    if ((float)$updatedTotalCollections !== (float)$contractServicePrice) {
+        return response()->json([
+            'status' => 400,
+            'updatedTotalCollections' => [$updatedTotalCollections, $contractServicePrice],
+            'message' => 'Total collections do not match the contract service price. Please ensure adjustments are correct.',
+        ], 400);
+    }
+
+
+    if ($request->hasFile('proof_of_payment')) {
+        $file = $request->file('proof_of_payment');
+
+        $path = $file->store('proof_of_payments', 'public');
+
+
+        $collection->update(['proof_of_payment' => $path]);
+    }
+
+    $collection->update($request->only(['amount', 'status']));
+
+    if ($request->has('new_collection')) {
+        $newCollection = $request->input('new_collection');
+
+
+        if ($request->hasFile('new_collection.proof_of_payment')) {
+            $newProofPath = $request->file('new_collection.proof_of_payment')->store('proofs', 'public');
+            // $newCollection['proof_of_payment'] = $newProofPath;
+        }
+
+        // Create the new collection
+        $contractService->collections()->create([
+            'amount' => $newCollection['amount'],
+            'date' => $newCollection['date'],
+            'status' => $newCollection['status'],
+            'proof_of_payment' =>  $newProofPath ?? null, // Handle optional proof_of_payment
+
+        ]);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Collection updated successfully.',
+        'data' => $collection,
+    ]);
+}
 
 }
+
 
 

@@ -22,9 +22,9 @@ class TaskController extends Controller
         $user = auth()->user();
 
 
-        if ($user->hasRole('owner')) {
-            return response()->json(['message' => 'Permission denied: Only for owners .'], 403);
-        }
+        // if ($user->hasRole('owner')) {
+        //     return response()->json(['message' => 'Permission denied: Only for owners .'], 403);
+        // }
 
 
         $request->validate([
@@ -115,7 +115,7 @@ class TaskController extends Controller
      * Allow team leaders to assign tasks to members in their team.
      */
 
-     
+
     public function assignTasksToTeamMember(Request $request)
     {
         $user = auth()->user();

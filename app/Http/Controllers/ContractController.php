@@ -51,17 +51,15 @@ class ContractController extends Controller
         }
     }
 
-
     public function createContract(Request $request)
     {
-
         $user = auth()->user();
+
         $request->validate([
             'serial_num' => 'required|string|unique:contracts,serial_num',
 
             'client' => 'required|array',
             'client.name' => 'required|string',
-            'client.company_name' => 'required|string',
             'client.email' => 'nullable|email',
             'client.phone' => 'required|string',
 
@@ -70,16 +68,17 @@ class ContractController extends Controller
             'services.*.note' => 'nullable|string',
             'services.*.price' => 'required|numeric',
 
-
             'services.*.layout' => 'required|array',
             'services.*.layout.*.layout_id' => 'required|exists:layouts,id',
             'services.*.layout.*.answer' => 'required|string',
 
-            'collections' => 'required|array',
-            'collections.*.amount' => 'required|numeric',
-            'collections.*.date' => 'required|date',
-            'collections.*.status' => 'required|in:pending,paid',
+            'services.*.collections' => 'required|array',
+            'services.*.collections.*.amount' => 'required|numeric',
+            'services.*.collections.*.date' => 'required|date',
+            'services.*.collections.*.status' => 'required|in:pending,paid',
+            'services.*.collections.*.proof_of_payment' => 'required_if:services.*.collections.*.status,paid|file',
         ]);
+        \Log::info($request->all());
 
         DB::beginTransaction();
 
@@ -87,7 +86,7 @@ class ContractController extends Controller
             // Step 1: Add or find the client
             $client = Client::updateOrCreate(
                 ['phone' => $request->client['phone']],
-                ['name' => $request->client['name'], 'email' => $request->client['email'],'company_name'=> $request->client['company_name']]
+                ['name' => $request->client['name'], 'email' => $request->client['email']]
             );
 
             // Step 2: Create the contract
@@ -98,7 +97,7 @@ class ContractController extends Controller
             ]);
 
             // Step 3: Add services and their questions
-            foreach ($request->services as $serviceData) {
+            foreach ($request->services as $serviceKey => $serviceData) {
                 $contractService = $contract->services()->attach($serviceData['service_id'], [
                     'note' => $serviceData['note'] ?? null,
                     'price' => $serviceData['price'],
@@ -113,19 +112,26 @@ class ContractController extends Controller
                         'answer' => $question['answer'],
                     ]);
                 }
+
+                // Step 4: Add collections for each service
+                foreach ($serviceData['collections'] as $collectionKey => $collectionData) {
+                    $collection = Collection::create([
+                        'contract_service_id' => $contractServiceId,
+                        'amount' => $collectionData['amount'],
+                        'date' => $collectionData['date'],
+                        'status' => $collectionData['status'],
+                    ]);
+
+                    // If status is paid, upload the proof of payment
+                    if ($collectionData['status'] === 'paid' && $request->hasFile("services.{$serviceKey}.collections.{$collectionKey}.proof_of_payment")) {
+                        $file = $request->file("services.{$serviceKey}.collections.{$collectionKey}.proof_of_payment");
+                        $path = $file->store('proof_of_payment', 'public');
+
+                        $collection->update(['proof_of_payment' => $path]);
+                    }
+                }
             }
 
-            // Step 4: Add collections
-            foreach ($request->collections as $collectionData) {
-                Collection::create([
-                    'contract_service_id' => $contractServiceId,
-                    'amount' => $collectionData['amount'],
-                    'date' => $collectionData['date'],
-                    'status' => $collectionData['status'],
-
-
-                ]);
-            }
 
             DB::commit();
 
@@ -136,47 +142,96 @@ class ContractController extends Controller
         }
     }
 
-    // Get all contracts for the authenticated user
-    // public function getContractss()
-    // {
+    public function createContractv2(Request $request)
+    {
+        $user = auth()->user();
 
-    //     $contracts = Contract::
-    //         with(['client', 'services','collections','salesEmployee'])
-    //         ->get();
+        $request->validate([
+            'serial_num' => 'required|string|unique:contracts,serial_num',
 
+            'client' => 'required|array',
+            'client.name' => 'required|string',
+            'client.email' => 'nullable|email',
+            'client.phone' => 'required|string',
 
-    //     $contractsData = $contracts->map(function ($contract) {
+            'services' => 'required|array',
+            'services.*.service_id' => 'required|exists:services,id',
+            'services.*.note' => 'nullable|string',
+            'services.*.price' => 'required|numeric',
 
-    //         $contractData = $contract->toArray();
+            'services.*.layout' => 'required|array',
+            'services.*.layout.*.layout_id' => 'required|exists:layouts,id',
+            'services.*.layout.*.answer' => 'required|string',
 
-    //         $servicesWithLayouts = $contract->services->map(function ($service) use ($contract) {
+            'services.*.collections' => 'required|array',
+            'services.*.collections.*.amount' => 'required|numeric',
+            'services.*.collections.*.date' => 'required|date',
+            'services.*.collections.*.status' => 'required|in:pending,paid',
+        ]);
 
-    //             $serviceLayouts = $contract->contractServiceLayouts->filter(function ($layout) use ($service) {
-    //                 return $layout->contract_service_id == $service->pivot->contract_id;
-    //             });
+        DB::beginTransaction();
 
+        try {
+            // Step 1: Add or find the client
+            $client = Client::updateOrCreate(
+                ['phone' => $request->client['phone']],
+                ['name' => $request->client['name'], 'email' => $request->client['email']]
+            );
 
-    //             $serviceData = $service->toArray();
-    //             $serviceData['layouts'] = $serviceLayouts->map(function ($layout) {
+            // Step 2: Create the contract
+            $contract = Contract::create([
+                'serial_num' => $request->serial_num,
+                'sales_employee_id' => $user->id,
+                'client_id' => $client->id,
+            ]);
 
-    //                 $layoutData = $layout->toArray();
-    //                 // $layoutData['layout_details'] = $layout->layout ? $layout->layout->toArray() : null; // Add layout details
-    //                 return $layoutData;
-    //             });
+            // Step 3: Add services and their related data
+            foreach ($request->services as $serviceData) {
+                // Calculate the total collection amount for this service
+                $totalCollectionAmount = array_sum(array_column($serviceData['collections'], 'amount'));
 
-    //             return $serviceData;
-    //         });
+                // Validate that the total collections match the service price
+                if ((float)$totalCollectionAmount !== (float)$serviceData['price']) {
+                    throw new \Exception("The total collection amount must equal the service price for service ID: {$serviceData['service_id']}");
+                }
 
-    //         $contractData['services'] = $servicesWithLayouts;
-    //         $contractData['sales_employee'] = $contract->salesEmployee ? $contract->salesEmployee->toArray() : null;
+                // Attach the service to the contract
+                $contractService = $contract->services()->attach($serviceData['service_id'], [
+                    'note' => $serviceData['note'] ?? null,
+                    'price' => $serviceData['price'],
+                ]);
 
+                // Get the last inserted pivot ID
+                $contractServiceId = DB::getPdo()->lastInsertId();
 
-    //         return $contractData;
-    //     });
+                // Add layouts for the service
+                foreach ($serviceData['layout'] as $question) {
+                    ContractServiceLayout::create([
+                        'contract_service_id' => $contractServiceId,
+                        'layout_id' => $question['layout_id'],
+                        'answer' => $question['answer'],
+                    ]);
+                }
 
-    //     return response()->json($contractsData);
-    // }
+                // Add collections for the service
+                foreach ($serviceData['collections'] as $collectionData) {
+                    Collection::create([
+                        'contract_service_id' => $contractServiceId,
+                        'amount' => $collectionData['amount'],
+                        'date' => $collectionData['date'],
+                        'status' => $collectionData['status'],
+                    ]);
+                }
+            }
 
+            DB::commit();
+
+            return response()->json(['message' => 'Contract created successfully', 'contract' => $contract], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
     public function getContracts()
     {
@@ -232,27 +287,50 @@ class ContractController extends Controller
     }
 
     // Add collection to a contract service
-    public function addCollection(Request $request)
+    public function handleCollections(Request $request)
     {
         $request->validate([
-            'contract_service_id' => 'required|exists:contract_services,id',
-            'amount' => 'required|numeric',
-            'date' => 'required|date',
-            'invoice'=>'required|file|mimes:pdf,xlsx,csv|max:2048',
-            'status' => 'required|in:pending,paid',
+            'collections' => 'required|array',
+            'collections.*.id' => 'required|exists:collections,id',
+            'collections.*.amount' => 'nullable|numeric',
+            'collections.*.status' => 'required|in:pending,paid',
+            'collections.*.proof_of_payment' => 'required_if:collections.*.status,paid|file|mimes:pdf|max:2048',
         ]);
 
+        $totalCollections = 0;
 
+        foreach ($request->collections as $collectionData) {
+            $collection = Collection::findOrFail($collectionData['id']); // Find the collection by ID
+            $contractService = $collection->contractService; // Get the related ContractService
 
+            // Update the collection
+            $collection->update([
+                'amount' => $collectionData['amount'] ?? $collection->amount, // Update amount if provided
+                'status' => $collectionData['status'], // Update status
+            ]);
 
-    $file = $request->file('invoice');
-    $filePath = $file->store('invoice', 'public');
+            // If the status is "paid" and a proof of payment file is provided
+            if ($collectionData['status'] === 'paid' && isset($collectionData['proof_of_payment'])) {
+                $file = $collectionData['proof_of_payment'];
+                $path = $file->store('proof_of_payment', 'public');
+                $collection->update(['proof_of_payment' => $path]);
+            }
 
+            $totalCollections += $collection->amount;
+        }
 
-        $collection = Collection::create($request->only('contract_service_id', 'amount', 'date', 'status'));
+        // Validate the total collections amount
+        $contractServicePrice = $contractService->price;
+        if ($totalCollections !== $contractServicePrice) {
+            return response()->json([
+                'message' => 'Total collections amount must equal the contract service price.',
+            ], 400);
+        }
 
-        return response()->json(['message' => 'Collection added successfully', 'collection' => $collection]);
+        return response()->json(['message' => 'Collections updated successfully.']);
     }
+
+
 
     // Get collections for a specific contract service
     public function getCollectionsByService($serviceId)

@@ -336,6 +336,37 @@ public function calculateAllSalesSalaries(Request $request)
 
             return response()->json(['message' => 'Salary added successfully', 'data' => $salary], 201);
         }
+
+        public function addDeduction(Request $request, $id)
+        {
+            // Validate input
+            $request->validate([
+                'deduction' => 'required|numeric|min:0',
+            ]);
+
+            // Find the MonthlySalary record
+            $monthlySalary = MonthlySalary::find($id);
+
+            if (!$monthlySalary) {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Monthly Salary record not found.',
+                ], 400);
+            }
+
+            // Add the deduction
+            // $monthlySalary->Deduction = $monthlySalary->Deduction + $request->deduction;
+            // $monthlySalary->net_salary -= $request->deduction;
+
+            $monthlySalary->Deduction =  $request->deduction;
+            $monthlySalary->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Deduction added successfully.',
+                'data' => $monthlySalary,
+            ]);
+        }
     }
 
 

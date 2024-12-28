@@ -9,7 +9,7 @@ class Collection extends Model
 {
     use HasFactory,SoftDeletes;
 
-    protected $fillable = ['contract_service_id', 'amount', 'date', 'status','is_approval','invoice'];
+    protected $fillable = ['contract_service_id', 'amount', 'date', 'status','is_approval','proof_of_payment'];
 
     public function contractService()
     {
@@ -30,6 +30,8 @@ class Collection extends Model
 
 
 
+
+    
 
 }
 

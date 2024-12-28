@@ -24,5 +24,11 @@ class ContractService extends Pivot
     {
         return $this->hasMany(ContractServiceLayout::class,'contract_service_id');
     }
+
+    public function collections()
+{
+    return $this->hasMany(Collection::class, 'contract_service_id', 'id');
+}
+
 }
 
