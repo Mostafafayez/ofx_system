@@ -320,29 +320,36 @@ class SalaryController extends Controller
     }
 
 
-
     public function addSalary(Request $request)
     {
-
+    
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'base_salary' => 'required|numeric|min:0',
-            'target_percentage' => 'required|numeric|min:0|max:100',
-            'target' => 'required|numeric|min:0',
-            'commission_percentage' => 'required|numeric|min:0|max:100',
+            'salary' => 'required|array',
+            'salary.*.base_salary' => 'required|numeric|min:0',
+            'salary.*.target_percentage' => 'required|numeric|min:0|max:100',
+            'salary.*.target' => 'required|numeric|min:0',
+            'salary.*.commission_percentage' => 'required|numeric|min:0|max:100',
         ]);
-        // log::info($request);
-        // Create salary record
-        $salary = Salary::create([
-            'user_id' => $request->user_id,
-            'base_salary' => $request->base_salary,
-            'target_percentage' => $request->target_percentage,
-            'target' => $request->target,
-            'commission_percentage' => $request->commission_percentage,
-        ]);
-
-        return response()->json(['message' => 'Salary added successfully', 'data' => $salary], 201);
+    
+      
+        $salaries = [];
+        foreach ($request->salary as $salaryData) {
+            $salaries[] = Salary::create([
+                'user_id' => $request->user_id,
+                'base_salary' => $salaryData['base_salary'],
+                'target_percentage' => $salaryData['target_percentage'],
+                'target' => $salaryData['target'],
+                'commission_percentage' => $salaryData['commission_percentage'],
+            ]);
+        }
+    
+        return response()->json([
+            'message' => 'Salaries added successfully',
+            'data' => $salaries,
+        ], 201);
     }
+    
 
     public function addDeduction(Request $request, $id)
     {
