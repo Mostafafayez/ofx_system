@@ -46,8 +46,8 @@ class BonusController extends Controller
 
         // Calculate total sales for service and department in given month
         $totalAmount = ContractService::whereHas('contract', function ($query) use ($bonus) {
-                $query->where('department_id', $bonus->department_id);
-            })
+            $query->where('department_id', $bonus->department_id);
+        })
             ->where('service_id', $bonus->service_id)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
@@ -116,8 +116,8 @@ class BonusController extends Controller
 
         // Calculate profits
         $totalCollections = $approvedCollections + $notApprovedCollections;
-        $profit =$totalCollections-$totalMonthlyExpenses;
-        $netProfit = $approvedCollections-$totalMonthlyExpenses;
+        $profit = $totalCollections - $totalMonthlyExpenses;
+        $netProfit = $approvedCollections - $totalMonthlyExpenses;
         $deferredProfit = $notApprovedCollections;
 
         return response()->json([

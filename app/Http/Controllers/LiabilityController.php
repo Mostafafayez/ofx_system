@@ -168,7 +168,7 @@ class LiabilityController extends Controller
             $year = $request->year;
 
             // Get total liabilities of type 'monthly'
-            $totalMonthlyLiabilities = Liability::where('type', 'monthly')
+            $totalMonthlyLiabilities = Liability::
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->sum('amount');
