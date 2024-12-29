@@ -60,7 +60,8 @@ class ContractController extends Controller
 
             'client' => 'required|array',
             'client.name' => 'required|string',
-            'client.email' => 'nullable|email',
+            'client.email' => 'required|string|email',
+            'client.company_name' => 'required|company_name',
             'client.phone' => 'required|string',
 
             'services' => 'required|array',
@@ -86,7 +87,7 @@ class ContractController extends Controller
             // Step 1: Add or find the client
             $client = Client::updateOrCreate(
                 ['phone' => $request->client['phone']],
-                ['name' => $request->client['name'], 'email' => $request->client['email']]
+                ['name' => $request->client['name'], 'email' => $request->client['email'],'company_name' => $request->client['company_name'],]
             );
 
             // Step 2: Create the contract
@@ -94,6 +95,8 @@ class ContractController extends Controller
                 'serial_num' => $request->serial_num,
                 'sales_employee_id' => $user->id,
                 'client_id' => $client->id,
+
+
             ]);
 
             // Step 3: Add services and their questions
