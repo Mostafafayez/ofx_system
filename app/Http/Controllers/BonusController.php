@@ -91,8 +91,8 @@ class BonusController extends Controller
         $year = $request->year;
 
         // Get total liabilities of type 'monthly'
-        $totalMonthlyLiabilities = Liability::where('type', 'monthly')
-            ->whereYear('created_at', $year)
+        $totalMonthlyLiabilities = Liability::
+            whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->sum('total_amount');
 
