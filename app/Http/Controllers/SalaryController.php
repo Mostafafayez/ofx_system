@@ -197,7 +197,7 @@ class SalaryController extends Controller
             $netSalary += $totalBonus;
 
 
-            MonthlySalary::updateOrCreate(
+          $x=  MonthlySalary::updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'month' => $month,
@@ -212,6 +212,7 @@ class SalaryController extends Controller
 
             // Add results for the user
             $results[] = [
+                'id'=> $x->id,
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'net_salary' => $netSalary,
@@ -305,12 +306,12 @@ class SalaryController extends Controller
                 'base_salary' => $baseSalary,
                 'bonus_amount' => $totalBonus,
             ];
-            
+        }
         return response()->json([
             'message' => 'Non-sales salaries calculated successfully.',
             'data' => $results,
         ], 200);
-    }
+    
     }
 
 
