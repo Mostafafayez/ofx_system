@@ -218,6 +218,8 @@ class SalaryController extends Controller
                 'net_salary' => $netSalary,
                 'total_sales' => $totalSales,
                 'bonus_amount' => $totalBonus,
+                'total_after_deduction '  =>$x->total_salary,
+                'Deduction '  =>$x->Deduction,
             ];
         }
 
@@ -305,8 +307,11 @@ class SalaryController extends Controller
                 'net_salary' => $netSalary,
                 'base_salary' => $baseSalary,
                 'bonus_amount' => $totalBonus,
+                'total_after_deduction '  =>$monthlySalary->total_salary,
+                'Deduction '  =>$monthlySalary->Deduction,
             ];
         }
+  
         return response()->json([
             'message' => 'Non-sales salaries calculated successfully.',
             'data' => $results,
