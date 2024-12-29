@@ -13,6 +13,7 @@ use App\Models\ContractService;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 class SalaryController extends Controller
 {
 
@@ -35,18 +36,18 @@ class SalaryController extends Controller
         $month = $request->month;
         $year = $request->year;
 
-//sales
-        $users = User::where('department_id',1)->get();
+        //sales
+        $users = User::where('department_id', 1)->get();
         $results = [];
 
         foreach ($users as $user) {
 
             $totalSales = DB::table('contract_services')
-            ->join('contracts', 'contract_services.contract_id', '=', 'contracts.id')
-            ->where('contracts.sales_employee_id', $user->id)
-            ->whereMonth('contract_services.created_at', $month)
-            ->whereYear('contract_services.created_at', $year)
-            ->sum('contract_services.price');
+                ->join('contracts', 'contract_services.contract_id', '=', 'contracts.id')
+                ->where('contracts.sales_employee_id', $user->id)
+                ->whereMonth('contract_services.created_at', $month)
+                ->whereYear('contract_services.created_at', $year)
+                ->sum('contract_services.price');
 
             $salaryCases = Salary::where('user_id', $user->id)->get();
 
@@ -110,8 +111,8 @@ class SalaryController extends Controller
     }
 
 
-public function calculateAllSalesSalaries(Request $request)
-{
+    public function calculateAllSalesSalaries(Request $request)
+    {
         $request->validate([
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer|min:2000|max:' . Carbon::now()->year,
@@ -158,7 +159,7 @@ public function calculateAllSalesSalaries(Request $request)
 
             // If matched salary case found
             if ($matchedCase) {
-                $netSalary = ($matchedCase->commission_percentage / 100) *( ($matchedCase->target_percentage / 100)*$matchedCase->target) + $matchedCase->base_salary;
+                $netSalary = ($matchedCase->commission_percentage / 100) * (($matchedCase->target_percentage / 100) * $matchedCase->target) + $matchedCase->base_salary;
             } else {
 
                 $netSalary = $salaryCases->first()->base_salary ?? 0;
@@ -171,7 +172,7 @@ public function calculateAllSalesSalaries(Request $request)
 
             // Check for Bonus Eligibility
             $bonus = Bonus::where('department_id', 1)
-            ->where('valid_month', 'like', "$validMonth%")
+                ->where('valid_month', 'like', "$validMonth%")
                 ->where('status', 'active')
                 ->get();
 
@@ -195,7 +196,7 @@ public function calculateAllSalesSalaries(Request $request)
 
             $netSalary += $totalBonus;
 
-            // Update or create Monthly Salary record
+
             MonthlySalary::updateOrCreate(
                 [
                     'user_id' => $user->id,
@@ -275,14 +276,14 @@ public function calculateAllSalesSalaries(Request $request)
 
 
                 if ($serviceSales >= $bonus->target) {
-                    $bonusAmount =$bonus->bonus_amount;
+                    $bonusAmount = $bonus->bonus_amount;
                     $totalBonus += $bonusAmount;
                 }
             }
 
             $netSalary = $baseSalary + $totalBonus;
 
-            MonthlySalary::updateOrCreate(
+            $monthlySalary = MonthlySalary::updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'month' => $month,
@@ -294,81 +295,77 @@ public function calculateAllSalesSalaries(Request $request)
                     'bonus_amount' => $totalBonus,
                 ]
             );
-
-
+            
+    
             $results[] = [
+                'id' => $monthlySalary->id,
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'net_salary' => $netSalary,
                 'base_salary' => $baseSalary,
                 'bonus_amount' => $totalBonus,
             ];
-        }
-
+            
         return response()->json([
             'message' => 'Non-sales salaries calculated successfully.',
             'data' => $results,
         ], 200);
     }
-
-
-
-
-        public function addSalary(Request $request)
-        {
-
-            $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'base_salary' => 'required|numeric|min:0',
-                'target_percentage' => 'required|numeric|min:0|max:100',
-                'target' => 'required|numeric|min:0',
-                'commission_percentage' => 'required|numeric|min:0|max:100',
-            ]);
-                        // log::info($request);
-            // Create salary record
-            $salary = Salary::create([
-                'user_id' => $request->user_id,
-                'base_salary' => $request->base_salary,
-                'target_percentage' => $request->target_percentage,
-                'target' => $request->target,
-                'commission_percentage' => $request->commission_percentage,
-            ]);
-
-            return response()->json(['message' => 'Salary added successfully', 'data' => $salary], 201);
-        }
-
-        public function addDeduction(Request $request, $id)
-        {
-            // Validate input
-            $request->validate([
-                'deduction' => 'required|numeric|min:0',
-            ]);
-
-            // Find the MonthlySalary record
-            $monthlySalary = MonthlySalary::find($id);
-
-            if (!$monthlySalary) {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Monthly Salary record not found.',
-                ], 400);
-            }
-
-            // Add the deduction
-            // $monthlySalary->Deduction = $monthlySalary->Deduction + $request->deduction;
-            // $monthlySalary->net_salary -= $request->deduction;
-
-            $monthlySalary->Deduction =  $request->deduction;
-            $monthlySalary->save();
-
-            return response()->json([
-                'status' => 200,
-                'message' => 'Deduction added successfully.',
-                'data' => $monthlySalary,
-            ]);
-        }
     }
 
 
 
+    public function addSalary(Request $request)
+    {
 
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'base_salary' => 'required|numeric|min:0',
+            'target_percentage' => 'required|numeric|min:0|max:100',
+            'target' => 'required|numeric|min:0',
+            'commission_percentage' => 'required|numeric|min:0|max:100',
+        ]);
+        // log::info($request);
+        // Create salary record
+        $salary = Salary::create([
+            'user_id' => $request->user_id,
+            'base_salary' => $request->base_salary,
+            'target_percentage' => $request->target_percentage,
+            'target' => $request->target,
+            'commission_percentage' => $request->commission_percentage,
+        ]);
+
+        return response()->json(['message' => 'Salary added successfully', 'data' => $salary], 201);
+    }
+
+    public function addDeduction(Request $request, $id)
+    {
+        // Validate input
+        $request->validate([
+            'deduction' => 'required|numeric|min:0',
+        ]);
+
+        // Find the MonthlySalary record
+        $monthlySalary = MonthlySalary::find($id);
+
+        if (!$monthlySalary) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Monthly Salary record not found.',
+            ], 400);
+        }
+
+        // Add the deduction
+        // $monthlySalary->Deduction = $monthlySalary->Deduction + $request->deduction;
+        // $monthlySalary->net_salary -= $request->deduction;
+
+        $monthlySalary->Deduction =  $request->deduction;
+        $monthlySalary->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Deduction added successfully.',
+            'data' => $monthlySalary,
+        ]);
+    }
+}
