@@ -13,7 +13,7 @@ class ManagerController extends Controller
     public function addManagerWithTeams(Request $request)
     {
         $request->validate([
-            'user_id' => ['required', 'exists:users,id', 'role:manager'], 
+            'user_id' => ['required', 'exists:users,id'], 
             'team_ids' => ['required', 'array'],
             'team_ids.*' => ['exists:teams,id'],
         ]);
