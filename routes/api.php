@@ -251,6 +251,7 @@ Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(fu
     Route::post('/report', [BonusController::class, 'getMonthlyReportv2']);
     Route::get('/sales-by-employee', [OwnerDashboardController::class, 'getTotalSalesByEmployee']);
     Route::get('/Services', [OwnerDashboardController::class, 'getTotalServicePrices']);
+    Route::get('/totaly-report', [BonusController::class, 'gettotalyReport']);
 });
 
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
@@ -279,7 +280,7 @@ Route::get('/bonuses', [BonusController::class, 'getAllBonuses']);
 Route::get('/bonuses/{id}/check', [BonusController::class, 'checkBonusStatus']);
 Route::delete('/bonuses/{id}', [BonusController::class, 'deleteBonus']);
 
-Route::get('/monthly-report', [BonusController::class, 'gettotalyReport']);
+
 
 
 

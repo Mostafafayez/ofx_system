@@ -9,9 +9,18 @@ use App\Models\Liability;
 use App\Models\MonthlySalary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class BonusController extends Controller
 {
+    use AuthorizesRequests;
+
+    public function __construct()
+    {
+
+        $this->authorize('owner');
+    }
+
     // 1. Create a new bonus
     public function createBonus(Request $request)
     {
