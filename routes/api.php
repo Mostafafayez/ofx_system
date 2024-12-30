@@ -43,9 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-
+Route::post('/add', [ManagerController::class, 'addManagerWithTeams']);
 Route::middleware('auth:sanctum')->prefix('managers')->group(function () {
-    Route::post('/add', [ManagerController::class, 'addManagerWithTeams']);
+
     Route::get('/', [ManagerController::class, 'getAllManagersWithTeams']);
     Route::get('/{id}', [ManagerController::class, 'getManagerById']);
     Route::delete('/{id}', [ManagerController::class, 'deleteManager']);

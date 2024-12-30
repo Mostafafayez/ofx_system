@@ -20,7 +20,7 @@ class ManagerController extends Controller
 
         $manager = User::findOrFail($request->user_id);
 
-        // Attach teams to the manager
+       
         $manager->teams()->sync($request->team_ids);
 
         return response()->json(['message' => 'Manager assigned to teams successfully.'], 200);
