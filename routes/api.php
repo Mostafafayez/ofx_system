@@ -276,10 +276,10 @@ Route::get('/bonuses', [BonusController::class, 'getAllBonuses']);
 Route::get('/bonuses/{id}/check', [BonusController::class, 'checkBonusStatus']);
 Route::delete('/bonuses/{id}', [BonusController::class, 'deleteBonus']);
 
+Route::get('/monthly-report', [BonusController::class, 'gettotalyReport']);
 
 
 
-Route::post('/monthly-report', [LiabilityController::class, 'getMonthlyReportv2']);
 
 Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
 

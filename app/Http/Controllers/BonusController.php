@@ -91,8 +91,7 @@ class BonusController extends Controller
         $year = $request->year;
 
         // Get total liabilities of type 'monthly'
-        $totalMonthlyLiabilities = Liability::
-            whereYear('created_at', $year)
+        $totalMonthlyLiabilities = Liability::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->sum('total_amount');
 
@@ -132,5 +131,69 @@ class BonusController extends Controller
             'profit' => $profit,
             'deferred_profit' => $deferredProfit,
         ], 200);
+    }
+    public function gettotalyReport()
+    {
+        // Get total liabilities grouped by year and month
+        $liabilities = Liability::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(total_amount) as total_amount')
+            ->groupBy('year', 'month')
+            ->get()
+            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+    
+        // Get total salaries (net_salary + bonus_amount) grouped by year and month
+        $salaries = MonthlySalary::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(net_salary + bonus_amount) as total_salaries')
+        ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+        ->get()
+        ->keyBy(fn($item) => $item->year . '-' . $item->month);
+    
+    
+        // Get collections grouped by year, month, and approval status
+        $collections = Collection::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, is_approval, SUM(amount) as total_amount')
+            ->groupBy('year', 'month', 'is_approval')
+            ->get()
+            ->groupBy(fn($item) => $item->year . '-' . $item->month);
+    
+        $result = [];
+    
+        // Iterate through all grouped months and years
+        foreach ($liabilities as $key => $liability) {
+            $year = explode('-', $key)[0];
+            $month = explode('-', $key)[1];
+    
+            $salary = $salaries->get($key);
+            $collection = $collections->get($key);
+    
+            $totalMonthlyLiabilities = $liability->total_amount ?? 0;
+            $totalSalaries = $salary->total_salaries ?? 0;
+    
+            // Calculate total monthly expenses
+            $totalMonthlyExpenses = $totalMonthlyLiabilities + $totalSalaries;
+    
+            // Calculate collections
+            $approvedCollections = $collection?->where('is_approval', true)->sum('total_amount') ?? 0;
+            $notApprovedCollections = $collection?->where('is_approval', false)->sum('total_amount') ?? 0;
+    
+            $totalCollections = $approvedCollections + $notApprovedCollections;
+            $profit = $totalCollections - $totalMonthlyExpenses;
+            $netProfit = $approvedCollections - $totalMonthlyExpenses;
+            $deferredProfit = $notApprovedCollections;
+    
+            $result[] = [
+                'year' => $year,
+                'month' => $month,
+                'total_monthly_expenses' => $totalMonthlyExpenses,
+                'total_salaries' => $totalSalaries,
+                'total_liabilities' => $totalMonthlyLiabilities,
+                'collections' => [
+                    'approved' => $approvedCollections,
+                    'not_approved' => $notApprovedCollections,
+                ],
+                'net_profit' => $netProfit,
+                'profit' => $profit,
+                'deferred_profit' => $deferredProfit,
+            ];
+        }
+    
+        return response()->json($result, 200);
     }
 }
