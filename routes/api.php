@@ -259,12 +259,15 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
 });
 
 Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
-
+    
+    Route::post('/{id}', [SalaryController::class, 'updateSalaryById']);
     Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
     Route::post('/technical', [SalaryController::class, 'calculateTechnicalSalaries']);
     Route::post('/employee', [SalaryController::class, 'addSalary']);
     Route::post('/deduction/{id}', [SalaryController::class, 'addDeduction']);
+    Route::delete('/{id}', [SalaryController::class, 'deletesalary']);
 
+    
 });
 
 

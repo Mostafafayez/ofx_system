@@ -76,7 +76,7 @@ class ContractController extends Controller
             'services.*.collections' => 'required|array',
             'services.*.collections.*.amount' => 'required|numeric',
             'services.*.collections.*.date' => 'required|date',
-            'services.*.collections.*.status' => 'required|in:pending,paid',
+            'services.*.collections.*.status' => 'required|in:pending,paid,cash',
             'services.*.collections.*.proof_of_payment' => 'required_if:services.*.collections.*.status,paid|file',
         ]);
         \Log::info($request->all());
@@ -128,7 +128,7 @@ class ContractController extends Controller
                     // If status is paid, upload the proof of payment
                     if ($collectionData['status'] === 'paid' && $request->hasFile("services.{$serviceKey}.collections.{$collectionKey}.proof_of_payment")) {
                         $file = $request->file("services.{$serviceKey}.collections.{$collectionKey}.proof_of_payment");
-                        $path = $file->store('proof_of_payment', 'public');
+                        $path = $file->store('proof_of_payments', 'public');
 
                         $collection->update(['proof_of_payment' => $path]);
                     }

@@ -197,7 +197,7 @@ class SalaryController extends Controller
             $netSalary += $totalBonus;
 
 
-          $x=  MonthlySalary::updateOrCreate(
+            $x =  MonthlySalary::updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'month' => $month,
@@ -212,14 +212,14 @@ class SalaryController extends Controller
 
             // Add results for the user
             $results[] = [
-                'id'=> $x->id,
+                'id' => $x->id,
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'net_salary' => $netSalary,
                 'total_sales' => $totalSales,
                 'bonus_amount' => $totalBonus,
-                'total_after_deduction'=>$x->total_salary,
-                'Deduction' =>$x->Deduction,
+                'total_after_deduction' => $x->total_salary,
+                'Deduction' => $x->Deduction,
             ];
         }
 
@@ -298,8 +298,8 @@ class SalaryController extends Controller
                     'bonus_amount' => $totalBonus,
                 ]
             );
-            
-    
+
+
             $results[] = [
                 'id' => $monthlySalary->id,
                 'user_id' => $user->id,
@@ -307,22 +307,21 @@ class SalaryController extends Controller
                 'net_salary' => $netSalary,
                 'base_salary' => $baseSalary,
                 'bonus_amount' => $totalBonus,
-                'total_after_deduction'=>$monthlySalary->total_salary,
-                'Deduction' =>$monthlySalary->Deduction,
+                'total_after_deduction' => $monthlySalary->total_salary,
+                'Deduction' => $monthlySalary->Deduction,
             ];
         }
-  
+
         return response()->json([
             'message' => 'Non-sales salaries calculated successfully.',
             'data' => $results,
         ], 200);
-    
     }
 
 
     public function addSalary(Request $request)
     {
-    
+
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'salary' => 'required|array',
@@ -331,8 +330,8 @@ class SalaryController extends Controller
             'salary.*.target' => 'required|numeric|min:0',
             'salary.*.commission_percentage' => 'required|numeric|min:0|max:100',
         ]);
-    
-      
+
+
         $salaries = [];
         foreach ($request->salary as $salaryData) {
             $salaries[] = Salary::create([
@@ -343,13 +342,13 @@ class SalaryController extends Controller
                 'commission_percentage' => $salaryData['commission_percentage'],
             ]);
         }
-    
+
         return response()->json([
             'message' => 'Salaries added successfully',
             'data' => $salaries,
         ], 201);
     }
-    
+
 
     public function addDeduction(Request $request, $id)
     {
@@ -381,4 +380,45 @@ class SalaryController extends Controller
             'data' => $monthlySalary,
         ]);
     }
+
+
+
+    public function updateSalaryById(Request $request, $id)
+    {
+        
+        $request->validate([
+            'base_salary' => 'sometimes|numeric|min:0',
+            'target_percentage' => 'sometimes|numeric|min:0|max:100',
+            'target' => 'sometimes|numeric|min:0',
+            'commission_percentage' => 'sometimes|numeric|min:0|max:100',
+        ]);
+
+      
+        $salary = Salary::find($id);
+
+        if (!$salary) {
+            return response()->json(['message' => 'Salary not found'], 404);
+        }
+
+   
+        $salary->update($request->only([
+            'base_salary',
+            'target_percentage',
+            'target',
+            'commission_percentage',
+        ]));
+
+        return response()->json([
+            'message' => 'Salary updated successfully',
+            'salary' => $salary,
+        ], 200);
+    }
+
+
+    public function deletesalary($id)
+    {
+        Salary::destroy($id);
+        return response()->json(['message' => 'Salary deleted successfully']);
+    }
+
 }

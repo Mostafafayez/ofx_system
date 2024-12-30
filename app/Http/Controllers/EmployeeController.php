@@ -144,9 +144,9 @@ class EmployeeController extends Controller
     $user = auth()->user();
 
     // Permission check
-    if (!$user->hasRole('owner') && !$user->can('updateuserinfo')) {
-        return response()->json(['message' => 'Permission denied: Only owners or users with the updateuserinfo permission can update user info.'], 403);
-    }
+    // if (!$user->hasRole('owner') && !$user->can('updateuserinfo')) {
+    //     return response()->json(['message' => 'Permission denied: Only owners or users with the updateuserinfo permission can update user info.'], 403);
+    // }
 
     // Fetch the user by ID
     $user = User::find($id);
@@ -159,7 +159,7 @@ class EmployeeController extends Controller
     $request->validate([
         'name' => 'sometimes|string|max:255',
         'email' => 'sometimes|email|unique:users,email,' . $user->id,
-        'password' => 'sometimes|string|min:6|confirmed',
+        'password' => 'sometimes|string|min:6',
         'role' => 'sometimes|string|exists:roles,name',
         'team_id' => 'sometimes|integer|exists:teams,id',
         'department_id' => 'sometimes|integer|exists:departments,id',
@@ -167,13 +167,14 @@ class EmployeeController extends Controller
         'permissions.*' => 'string|exists:permissions,name',
     ]);
 
-    // Update user attributes
-    if ($request->has('name')) $user->name = $request->name;
-    if ($request->has('email')) $user->email = $request->email;
-    if ($request->has('password')) $user->password = Hash::make($request->password);
-    if ($request->has('team_id')) $user->team_id = $request->team_id;
-    if ($request->has('department_id')) $user->department_id = $request->department_id;
 
+    $user->update($request->only([
+        'name',
+        'email',
+        'password',
+        'team_id',
+        'department_id',
+    ]));
     $user->save();
 
     // Update role and permissions

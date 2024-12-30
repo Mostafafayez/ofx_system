@@ -90,52 +90,52 @@ class LeadsController extends Controller
     }
 
 
-public function create(Request $request)
-{
-    $request->validate([
-        'company_name' => 'required|string|max:255',
-        'client_name' => 'required|string|max:255',
-        'email' => 'required|email',
-        'phone' => 'required|array|min:1',
-        'phone.*' => 'required|string|max:15',
-        'from_where' =>'required|string|max:255',
-    ]);
+    public function create(Request $request)
+    {
+        $request->validate([
+            'company_name' => 'required|string|max:255',
+            'client_name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'required|array|min:1',
+            'phone.*' => 'required|string|max:15',
+            'from_where' => 'required|string|max:255',
+        ]);
 
 
-    $existingLead = Lead::whereJsonContains('phone', $request->phone)->first();
+        $existingLead = Lead::whereJsonContains('phone', $request->phone)->first();
 
-    if ($existingLead) {
+        if ($existingLead) {
 
-        $lastFollowUp = FollowUp::where('lead_id', $existingLead->id)
-            ->latest('followed_date')
-            ->first();
+            $lastFollowUp = FollowUp::where('lead_id', $existingLead->id)
+                ->latest('followed_date')
+                ->first();
 
 
-        if ($lastFollowUp && Carbon::parse($lastFollowUp->followed_date)->addDays(10)->isFuture()) {
-            return response()->json([
-                'message' => 'This lead already exists and is assigned to another salesperson.',
-                'sales_id' => $existingLead->sales_id,
-                'existing_lead' => $existingLead
-            ], 400);
+            if ($lastFollowUp && Carbon::parse($lastFollowUp->followed_date)->addDays(10)->isFuture()) {
+                return response()->json([
+                    'message' => 'This lead already exists and is assigned to another salesperson.',
+                    'sales_id' => $existingLead->sales_id,
+                    'existing_lead' => $existingLead
+                ], 400);
+            }
         }
+
+
+        $lead = Lead::create([
+            'sales_id' => auth()->user()->id,
+            'company_name' => $request->company_name,
+            'client_name' => $request->client_name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'from_where' => $request->from_where,
+            'status' => 'new',
+        ]);
+
+        return response()->json([
+            'message' => 'Lead created successfully',
+            'lead' => $lead
+        ], 201);
     }
-
-
-    $lead = Lead::create([
-        'sales_id' => auth()->user()->id,
-        'company_name' => $request->company_name,
-        'client_name' => $request->client_name,
-        'email' => $request->email,
-        'phone' => $request->phone,
-        'from_where' => $request->from_where,
-        'status' => 'new',
-    ]);
-
-    return response()->json([
-        'message' => 'Lead created successfully',
-        'lead' => $lead
-    ], 201);
-}
 
 
     /**
@@ -144,7 +144,7 @@ public function create(Request $request)
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|max:255',
+           'status' => 'required|string|max:255|in:new,in_progress,closed',
         ]);
 
         $lead = Lead::find($id);
@@ -168,7 +168,7 @@ public function create(Request $request)
             'lead_id' => 'required|exists:leads,id',
             'details' => 'required|string|max:255',
             'followed_date' => 'required|date',
-            'status' =>'required|in:un-qualified,qualified,cold-lead,hot-lead',
+            'status' => 'required|in:un-qualified,qualified,cold-lead,hot-lead',
         ]);
 
         $followUp = FollowUp::create([
@@ -189,139 +189,135 @@ public function create(Request $request)
         $request->validate([
             'lead_id' => 'required|exists:leads,id',
             'offer' => 'required|file|mimes:pdf,jpeg,png|max:2048',
-            'description' =>'required|string',
-            'valid_until'=>'required|date'
+            'description' => 'required|string',
+            'valid_until' => 'required|date'
         ]);
 
         if ($request->hasFile('offer') && $request->file('offer')->isValid()) {
 
             $filePath = $request->file('offer')->store('offers', 'public');
 
-        $offer = Offer::create([
-            'lead_id' => $request->lead_id,
-            'offer_path' => $filePath,
-            'description' =>$request->description,
-            'valid_until'=>$request->valid_until,
+            $offer = Offer::create([
+                'lead_id' => $request->lead_id,
+                'offer_path' => $filePath,
+                'description' => $request->description,
+                'valid_until' => $request->valid_until,
+            ]);
+
+
+            return response()->json(['message' => 'Offer added successfully', 'offer' => $offer], 201);
+        } else {
+
+            return response()->json(['error' => 'No valid file uploaded'], 400);
+        }
+    }
+
+
+    public function getLeadsWithDetails()
+    {
+        $user = auth()->user();
+
+
+        $leads = Lead::where('sales_id', $user->id)
+            ->with(['followups', 'offers', 'notes'])
+            ->get();
+
+        return $leads;
+    }
+
+
+
+    public function filterLeadsByStatus(Request $request)
+    {
+        $user = auth()->user();
+
+        // Validate status input
+        $validated = $request->validate([
+            'status' => 'required|in:new,inprogress,closed,deals',
         ]);
 
+        $status = $validated['status'];
 
-        return response()->json(['message' => 'Offer added successfully', 'offer' => $offer], 201);
-    } else {
+        // Fetch leads filtered by status
+        $leads = Lead::where('sales_id', $user->id)
+            ->where('status', $status)
+            ->with(['followups', 'offers', 'notes'])
+            ->get();
 
-        return response()->json(['error' => 'No valid file uploaded'], 400);
+        return response()->json($leads);
     }
-}
 
 
-public function getLeadsWithDetails()
-{
-    $user = auth()->user();
+    public function filterallLeadsByStatus(Request $request)
+    {
+
+        $validated = $request->validate([
+            'status' => 'required|in:new,inprogress,closed,deals',
+        ]);
+
+        $status = $validated['status'];
+
+        // Fetch leads filtered by status
+        $leads = Lead::where('status', $status)
+            ->with(['followups', 'offers', 'notes', 'sales'])
+            ->get();
+
+        return response()->json($leads);
+    }
+
+    public function filterfollowupsByStatus(Request $request, $leadid)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'status' => 'required|in:un-qualified,qualified,cold-lead,hot-lead',
+        ]);
+
+        $status = $validated['status'];
 
 
-    $leads = Lead::where('sales_id', $user->id)
-        ->with(['followups', 'offers', 'notes'])
-        ->get();
+        $leads = FollowUp::where('lead_id', $leadid)
+            ->where('status', $status)
+            ->with(['lead', 'notes'])
+            ->get();
 
-    return $leads;
-}
+        return response()->json($leads);
+    }
 
-
-
-public function filterLeadsByStatus(Request $request)
-{
-    $user = auth()->user();
-
-    // Validate status input
-    $validated = $request->validate([
-        'status' => 'required|in:new,inprogress,closed,deals',
-    ]);
-
-    $status = $validated['status'];
-
-    // Fetch leads filtered by status
-    $leads = Lead::where('sales_id', $user->id)
-        ->where('status', $status)
-        ->with(['followups', 'offers', 'notes'])
-        ->get();
-
-    return response()->json($leads);
-}
+    public function allfollowups($leadid)
+    {
 
 
-public function filterallLeadsByStatus(Request $request)
-{
+        $leads = FollowUp::where('lead_id', $leadid)->get();
 
-    $validated = $request->validate([
-        'status' => 'required|in:new,inprogress,closed,deals',
-    ]);
-
-    $status = $validated['status'];
-
-    // Fetch leads filtered by status
-    $leads = Lead::where('status', $status)
-        ->with(['followups', 'offers', 'notes','sales'])
-        ->get();
-
-    return response()->json($leads);
-}
-
-public function filterfollowupsByStatus(Request $request,$leadid)
-{
-    $user = auth()->user();
-
-    $validated = $request->validate([
-        'status' =>'required|in:un-qualified,qualified,cold-lead,hot-lead',
-    ]);
-
-    $status = $validated['status'];
+        return response()->json($leads);
+    }
 
 
-    $leads = FollowUp::where('lead_id', $leadid)
-        ->where('status', $status)
-        ->with([ 'lead', 'notes'])
-        ->get();
+    public function alloffers($leadid)
+    {
 
-    return response()->json($leads);
-}
+        $leads = Offer::where('lead_id', $leadid)->get();
 
-public function allfollowups($leadid)
-{
- 
+        return response()->json($leads);
+    }
 
-    $leads = FollowUp::where('lead_id', $leadid)->get();
+    public function filterallfollowupsByStatus(Request $request, $leadid)
+    {
+        $user = auth()->user();
 
-    return response()->json($leads);
-}
+        $validated = $request->validate([
+            'status' => 'required|in:Un-qualified,qualified,cold-lead,hot-lead',
+        ]);
 
-
-public function alloffers($leadid)
-{
-
-    $leads = Offer::where('lead_id', $leadid)->get();
-
-    return response()->json($leads);
-}
-
-public function filterallfollowupsByStatus(Request $request,$leadid)
-{
-    $user = auth()->user();
-
-    $validated = $request->validate([
-        'status' =>'required|in:Un-qualified,qualified,cold-lead,hot-lead',
-    ]);
-
-    $status = $validated['status'];
+        $status = $validated['status'];
 
 
-    $leads = FollowUp::where('lead_id', $leadid)
-        ->where('status', $status)
-        ->with([ 'lead', 'notes'])
-        ->get();
+        $leads = FollowUp::where('lead_id', $leadid)
+            ->where('status', $status)
+            ->with(['lead', 'notes'])
+            ->get();
 
-    return response()->json($leads);
-}
-
-
-
-
+        return response()->json($leads);
+    }
 }
