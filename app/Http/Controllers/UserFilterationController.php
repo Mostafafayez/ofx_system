@@ -4,7 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Collection;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use App\Models\Bonus;
+use App\Models\Contract;
+use App\Models\MonthlySalary;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 
+use App\Models\User;
+use App\Models\Salary;
 class UserFilterationController extends Controller
 {
 
@@ -133,4 +140,93 @@ public function getCollectionsGroupedByAuthUser()
 }
 
 
+
+
+
+
+public function calculateTechnicalSalaries(Request $request)
+{
+
+    $request->validate([
+        'month' => 'required|integer|min:1|max:12',
+        'year' => 'required|integer|min:2000|max:' . Carbon::now()->year,
+    ]);
+
+    $month = $request->month;
+    $year = $request->year;
+
+
+    $formattedMonth = str_pad($month, 2, '0', STR_PAD_LEFT);
+
+    // Format valid_month as 'YYYY-MM'
+    $validMonth = "$year-$formattedMonth";
+
+
+    $users = User::where('department_id', '!=', 1)->get();
+    $results = [];
+
+    foreach ($users as $user) {
+
+        $baseSalary = 0;
+        $totalBonus = 0;
+
+
+        $salary = Salary::where('user_id', $user->id)->first();
+        $baseSalary = $salary ? $salary->base_salary : 0;
+
+
+        $bonuses = Bonus::where('department_id', $user->department_id)
+            ->where('valid_month', 'like', "$validMonth%")
+            ->where('status', 'active')
+            ->get();
+
+        foreach ($bonuses as $bonus) {
+
+            $serviceSales = DB::table('contract_services')
+                ->join('contracts', 'contract_services.contract_id', '=', 'contracts.id')
+                ->where('contract_services.service_id', $bonus->service_id)
+                ->whereMonth('contract_services.created_at', $month)
+                ->whereYear('contract_services.created_at', $year)
+                ->sum('contract_services.price');
+
+
+            if ($serviceSales >= $bonus->target) {
+                $bonusAmount = $bonus->bonus_amount;
+                $totalBonus += $bonusAmount;
+            }
+        }
+
+        $netSalary = $baseSalary + $totalBonus;
+
+        $monthlySalary = MonthlySalary::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'month' => $month,
+                'year' => $year,
+            ],
+            [
+                'net_salary' => $netSalary,
+                'total_sales' => 0,
+                'bonus_amount' => $totalBonus,
+            ]
+        );
+
+
+        $results[] = [
+            'id' => $monthlySalary->id,
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'net_salary' => $netSalary,
+            'base_salary' => $baseSalary,
+            'bonus_amount' => $totalBonus,
+            'total_after_deduction' => $monthlySalary->total_salary,
+            'Deduction' => $monthlySalary->Deduction,
+        ];
+    }
+
+    return response()->json([
+        'message' => 'Non-sales salaries calculated successfully.',
+        'data' => $results,
+    ], 200);
+}
 }
