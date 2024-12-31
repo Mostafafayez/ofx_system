@@ -259,7 +259,7 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::get('/collection/filter', [UserFilterationController::class, 'getCollectionsGroupedByAuthUser']);
 });
 
-Route::prefix('test')->middleware('auth:sanctum')->group(function () {
+Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
     
     Route::post('/{id}', [SalaryController::class, 'updateSalaryById']);
     Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
