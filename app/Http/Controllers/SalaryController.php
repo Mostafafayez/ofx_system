@@ -385,7 +385,7 @@ class SalaryController extends Controller
 
     public function updateSalaryById(Request $request, $id)
     {
-        
+
         $request->validate([
             'base_salary' => 'sometimes|numeric|min:0',
             'target_percentage' => 'sometimes|numeric|min:0|max:100',
@@ -393,14 +393,14 @@ class SalaryController extends Controller
             'commission_percentage' => 'sometimes|numeric|min:0|max:100',
         ]);
 
-      
+
         $salary = Salary::find($id);
 
         if (!$salary) {
             return response()->json(['message' => 'Salary not found'], 404);
         }
 
-   
+
         $salary->update($request->only([
             'base_salary',
             'target_percentage',
