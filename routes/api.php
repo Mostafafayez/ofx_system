@@ -164,17 +164,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('layouts', LayoutController::class);
 });
 
-
-// APIS FOR  OWNER ONLY
-
-
-
-
-
-
-
-
-
 //Teams
 Route::middleware(['auth:sanctum'])->group(function () {
 
@@ -242,9 +231,9 @@ Route::prefix('price-list')->middleware('auth:sanctum')->group(function () {
     });
 });
 
-
+   //owner
 Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
-    //owner
+
     Route::get('/grouped-by-date', [OwnerDashboardController::class, 'getCollectionsGroupedByMonthAndYear']);
     Route::get('/grouped-by-sales-employee', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeUsingRelation']);
     Route::get('/grouped-by-Service', [OwnerDashboardController::class, 'getCollectionsGroupedBySalesEmployeeAndService']);
@@ -254,48 +243,42 @@ Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(fu
     Route::get('/totaly-report', [BonusController::class, 'gettotalyReport']);
 });
 
+
 Route::prefix('user')->middleware('auth:sanctum')->group(function () {
 
     Route::get('/collection/filter', [UserFilterationController::class, 'getCollectionsGroupedByAuthUser']);
 });
 
+
 //salary
 Route::prefix('salary')->middleware('auth:sanctum')->group(function () {
-Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
-Route::post('/technical', [SalaryController::class, 'calculateTechnicalSalaries']);
-Route::post('/employee', [SalaryController::class, 'addSalary']);
-Route::post('/deduction/{id}', [SalaryController::class, 'addDeduction']);
-Route::delete('/{id}', [SalaryController::class, 'deletesalary']);
+    Route::post('/sales', [SalaryController::class, 'calculateAllSalesSalaries']);
+    Route::post('/technical', [SalaryController::class, 'calculateTechnicalSalaries']);
+    Route::post('/employee', [SalaryController::class, 'addSalary']);
+    Route::post('/deduction/{id}', [SalaryController::class, 'addDeduction']);
+    Route::delete('/{id}', [SalaryController::class, 'deletesalary']);
 });
 
 
-Route::post('/bonuses', [BonusController::class, 'createBonus']);
-Route::get('/bonuses', [BonusController::class, 'getAllBonuses']);
-Route::get('/bonuses/{id}/check', [BonusController::class, 'checkBonusStatus']);
-Route::delete('/bonuses/{id}', [BonusController::class, 'deleteBonus']);
-
-
-
-
-
-
-Route::prefix('dashboard')->middleware(['auth:sanctum', 'role:owner'])->group(function () {
-
-
-
-
+//bonuses
+Route::prefix('bonuses')->middleware('auth:sanctum')->group(function () {
+    Route::post('/', [BonusController::class, 'createBonus']);
+    Route::get('/', [BonusController::class, 'getAllBonuses']);
+    Route::get('/{id}/check', [BonusController::class, 'checkBonusStatus']);
+    Route::delete('/{id}', [BonusController::class, 'deleteBonus']);
 });
 
 
 
-Route::middleware('auth:sanctum')->get('/user/team', [userDashboardController::class, 'getTeamId']);
+Route::middleware('auth:sanctum')->group(function () {
 
-Route::middleware('auth:sanctum')->get('/sales', [CollectionController::class, 'getCollectionsByAuthUser']);
+    Route::get('/user/team', [userDashboardController::class, 'getTeamId']);
+    Route::get('/sales', [CollectionController::class, 'getCollectionsByAuthUser']);
+    Route::get('/collections', [CollectionController::class, 'getCollectionss']);
+    Route::get('/sales-employees', [CollectionController::class, 'getAllSalesEmployeesWithCollections']);
 
-Route::middleware('auth:sanctum')->get('/collections', [CollectionController::class, 'getCollectionss']);
+});
 
 
-Route::middleware('auth:sanctum')->get('/sales-employees', [CollectionController::class, 'getAllSalesEmployeesWithCollections']);
-
-
+Route::get('/contracts/{contractId}/layouts', [LayoutController::class, 'getContractLayouts']);
 

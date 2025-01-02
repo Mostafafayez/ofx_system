@@ -48,7 +48,7 @@ class TaskController extends Controller
             foreach ($contract->services as $service) {
 
 
-                $team = $teams->firstWhere('service_id', $service->id); // تعديل لاستخدام service_id
+                $team = $teams->firstWhere('service_id', $service->id); 
 
 
                 if ($team) {

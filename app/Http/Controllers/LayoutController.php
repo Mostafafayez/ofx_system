@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contract;
 use App\Models\Layout;
 use App\Models\Question;
 use App\Models\Service;
@@ -13,11 +14,11 @@ class LayoutController extends Controller
  use AuthorizesRequests;
 
 
-        public function __construct()
-        {
+        // public function __construct()
+        // {
 
-            $this->authorize('access-sales');
-        }
+        //     $this->authorize('access-sales');
+        // }
 
 
 
@@ -99,6 +100,30 @@ class LayoutController extends Controller
 
         return response()->json(['message' => 'Question deleted successfully']);
     }
+
+
+    public function getContractLayouts($contractId)
+{
+    // Fetch the contract by ID
+    $contract = Contract::with('contractServiceLayouts.layout')
+        ->find($contractId);
+
+    if (!$contract) {
+        return response()->json(['message' => 'Contract not found'], 404);
+    }
+
+    // Extract the layouts
+    $layouts = $contract->contractServiceLayouts->map(function ($contractServiceLayout) {
+        return [
+            'layout_id' => $contractServiceLayout->layout->id,
+            'layout_name' => $contractServiceLayout->layout->question,
+            'answer' => $contractServiceLayout->answer,
+        ];
+    });
+
+    return response()->json(['layouts' => $layouts], 200);
+}
+
 
 
 }
