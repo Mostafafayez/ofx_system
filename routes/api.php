@@ -140,6 +140,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     // Collection
  Route::prefix('collections')->middleware('auth:sanctum')->group(function () {
+
         Route::post('/', [ContractController::class, 'handleCollections']);
         Route::get('/service/{serviceId}', [ContractController::class, 'getCollectionsByService']);
         Route::get('/user', [ContractController::class, 'getCollectionsByUser']);
@@ -148,11 +149,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{collectionId}/approval', [CollectionController::class, 'updateApproval']);
         Route::post('/{collectionId}/status', [CollectionController::class, 'updateStatus']);
 
-
     });
 });
 
 Route::post('/collections/{id}', [CollectionController::class, 'updateCollectionWithAdjustments']);
+
 
 Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
 
@@ -162,6 +163,7 @@ Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('layouts', LayoutController::class);
+    Route::get('/contracts/{contractId}/layouts', [TaskController::class, 'getContractLayouts']);
 });
 
 //Teams
@@ -179,14 +181,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/my-teama', [TeamController::class, 'getMyTeamAndLeader']);
 });
 
-
+Route::get('/tasks', [TaskController::class, 'getUserTasks']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/task/assign', [TaskController::class, 'assignTasksToTeamMember']);
-    Route::get('/tasks', [TaskController::class, 'getUserTasks']);
+
     Route::get('/admin/tasks', [TaskController::class, 'getAllTasks']);
     Route::patch('/tasks/{task_id}/status', [TaskController::class, 'updateTaskStatus']);
+
 });
 
 Route::get('/mytasks', [TaskController::class, 'getAllTaskss']);
@@ -280,5 +283,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::get('/contracts/{contractId}/layouts', [LayoutController::class, 'getContractLayouts']);
+
 

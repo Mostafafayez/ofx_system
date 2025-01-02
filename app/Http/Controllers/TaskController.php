@@ -48,13 +48,13 @@ class TaskController extends Controller
             foreach ($contract->services as $service) {
 
 
-                $team = $teams->firstWhere('service_id', $service->id); 
+                $team = $teams->firstWhere('service_id', $service->id);
 
 
                 if ($team) {
                     Task::create([
                         'fromable_id' => $contract->id,
-                        'fromable_type' => 'contract_service',
+                        'fromable_type' => 'contract',
                         'task' => $service->name,
                         'assigned_type' => 'team',
                         'assigned_id' => $team->id,
@@ -154,7 +154,11 @@ class TaskController extends Controller
     public function getUserTasks()
     {
         $user = Auth::user();
-        $tasks = Task::where('assigned_id', $user->id)->get();
+        $tasks = Task::where('assigned_id', 1)
+        ->with(['fromable' => function ($query) {
+            $query->with('salesEmployee');
+        }])
+        ->get();
 
         return response()->json(['tasks' => $tasks]);
     }
@@ -195,4 +199,28 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task status updated successfully']);
     }
+
+    public function getContractLayouts($contractId)
+    {
+        // Fetch the contract by ID
+        $contract = Contract::with('contractServiceLayouts.layout')
+            ->find($contractId);
+
+        if (!$contract) {
+            return response()->json(['message' => 'Contract not found'], 404);
+        }
+
+        // Extract the layouts
+        $layouts = $contract->contractServiceLayouts->map(function ($contractServiceLayout) {
+            return [
+                'layout_id' => $contractServiceLayout->layout->id,
+                'layout_name' => $contractServiceLayout->layout->question,
+                'answer' => $contractServiceLayout->answer,
+            ];
+        });
+
+        return response()->json(['layouts' => $layouts], 200);
+    }
+
+
 }
