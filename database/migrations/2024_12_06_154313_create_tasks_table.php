@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('task')->nullable();
             $table->morphs('assigned');
             $table->morphs('fromable');
-            $table->enum('status', ['Pending', 'Paid'])->default('Pending');
+            $table->enum('status', ['Pending', 'complete'])->default('Pending');
             $table->enum('is_approval', ['true', 'false'])->default('false');
             $table->timestamps();
 

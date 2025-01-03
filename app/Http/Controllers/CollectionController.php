@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Collection;
 use App\Models\Contract;
+use App\Models\ContractService;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use App\Services\CollectionService;
@@ -320,6 +321,38 @@ public function updateCollectionWithAdjustments(Request $request, $id)
         'data' => $collection,
     ]);
 }
+
+public function getCollectionPercentageByContract($contractId)
+{
+    // Retrieve the contract with its services and collections
+    $contract = Contract::with(['collections', 'collections.contractService'])
+        ->find($contractId);
+
+    if (!$contract) {
+        return response()->json(['message' => 'Contract not found.'], 404);
+    }
+
+    // Prepare data for each ContractService
+    $contractServices = ContractService::where('contract_id', $contractId)->get();
+
+    $data = $contractServices->map(function ($service) {
+        $totalAmount = $service->price;
+        $collectedAmount = $service->collections->where('is_approval',"true")->sum('amount');
+        $percentage = $totalAmount > 0 ? ($collectedAmount / $totalAmount) * 100 : 0;
+
+        return [
+            'contract_service_id' => $service->service->name,
+            // 'total_amount' => $totalAmount,
+            // 'collected_amount' => $collectedAmount,
+            'percentage_collected' => round($percentage),
+
+        ];
+    });
+
+    return response()->json($data);
+}
+
+
 
 }
 

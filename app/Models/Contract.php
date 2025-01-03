@@ -12,12 +12,18 @@ class Contract extends Model
     protected $fillable = ['serial_num', 'sales_employee_id', 'client_id','status'];
 
 
+    public function collections()
+    {
+        return $this->hasManyThrough(Collection::class, ContractService::class, 'contract_id', 'contract_service_id');
+    }
+
+
 
     public function salesEmployee()
     {
         return $this->belongsTo(User::class, 'sales_employee_id');
     }
-    
+
     public function services()
     {
         return $this->belongsToMany(Service::class, 'contract_services', 'contract_id', 'service_id')
@@ -32,10 +38,6 @@ class Contract extends Model
     }
 
 
-    public function collections()
-    {
-        return $this->hasManyThrough(Collection::class, ContractService::class, 'contract_id', 'contract_service_id');
-    }
 
 
     public function notes()

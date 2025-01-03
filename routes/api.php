@@ -148,6 +148,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/sales', [CollectionController::class, 'getAllCollectionsBySales']);
         Route::post('/{collectionId}/approval', [CollectionController::class, 'updateApproval']);
         Route::post('/{collectionId}/status', [CollectionController::class, 'updateStatus']);
+        Route::get('/team/{contract_id}', [TaskController::class, 'getCollectionPercentageByContract']); // Percentage of collection for team
 
     });
 });
@@ -176,23 +177,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/teams', [TeamController::class, 'store']);
     });
 
-    Route::get('/teamleader/members', [TeamController::class, 'getTeamLeaderMembers']);
-    Route::middleware('role:manager')->get('/teams/members', [TeamController::class, 'getAllTeamsByType']);
-    Route::get('/my-teama', [TeamController::class, 'getMyTeamAndLeader']);
+        Route::get('/teamleader/members', [TeamController::class, 'getTeamLeaderMembers']);
+        Route::get('/my-team', [TeamController::class, 'getMyTeamandLeader']);
+
+     Route::middleware('role:manager')->get('/teams/members', [TeamController::class, 'getAllTeamsByType']);
+
 });
 
-Route::get('/tasks', [TaskController::class, 'getUserTasks']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
-
+    Route::get('/tasks/user', [TaskController::class, 'getUserTasks']);//get task by user_id
     Route::post('/task/assign', [TaskController::class, 'assignTasksToTeamMember']);
 
-    Route::get('/admin/tasks', [TaskController::class, 'getAllTasks']);
-    Route::patch('/tasks/{task_id}/status', [TaskController::class, 'updateTaskStatus']);
+    Route::get('/tasks/team', [TaskController::class, 'getTeamTasks']);
+    Route::get('/tasks', [TaskController::class, 'getAllTasksv2']);
+
+    Route::get('/tasks/status/{task_id}', [TaskController::class, 'updateTaskStatus']);//for user
+    Route::get('/tasks/approval/{task_id}', [TaskController::class, 'approveTask']); //for teamleader
+
+    Route::get('/tasks/admin', [TaskController::class, 'getAllTasks']); // not used yet
+
 
 });
 
-Route::get('/mytasks', [TaskController::class, 'getAllTaskss']);
 
 
 //notes

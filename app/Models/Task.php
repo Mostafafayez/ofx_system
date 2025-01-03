@@ -24,6 +24,15 @@ class Task extends Model
         return $this->morphTo();
     }
 
+
+    public function scopeWithSalesEmployee($query)
+    {
+        return $query->with(['fromable.salesEmployee' => function ($query) {
+            $query->select('id', 'name'); 
+        }]);
+    }
+
+
     public function teamLeader()
     {
         return $this->belongsTo(User::class, 'team_leader_id');

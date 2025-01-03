@@ -14,11 +14,11 @@ class TeamController extends Controller
     /**
      * Get all members under a specific team leader.
      */
-    public function __construct()
-    {
+    // public function __construct()
+    // {
 
-        $this->authorize('team_control');
-    }
+    //     $this->authorize('team_control');
+    // }
 
 
 
@@ -41,7 +41,7 @@ class TeamController extends Controller
 
     public function getTeamLeaderMembers()
     {
-        $this->authorize('teams');
+        // $this->authorize('teams');
 
         $teamLeaderId = auth()->user()->id;
 
@@ -58,7 +58,7 @@ class TeamController extends Controller
         return response()->json([
             'team_leader_id' => $teamLeaderId,
             'team' => $team,
-            'members' => $members,
+            // 'members' => $members,
         ]);
     }
 
@@ -111,13 +111,13 @@ public function filterAllTeamsWithdepartment(Request $request)
         'teams' => $teams,
     ]);
 }
-public function getMyTeamAndLeader()
+public function getMyTeamandLeader()
 {
     $user = auth()->user();
 
 
     $team = $user->team;
-    $teamLeader = $team ? $team->users : null;
+    $teamLeader = $team ? $team->teamLeader : null;
 
     if (!$team) {
         return response()->json([
@@ -126,7 +126,7 @@ public function getMyTeamAndLeader()
     }
 
     return response()->json([
-        'user' => $user,
+        // 'user' => $user,
         'team' => $team,
         'team_leader' => $teamLeader,
     ]);

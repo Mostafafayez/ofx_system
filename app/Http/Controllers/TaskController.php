@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
@@ -11,6 +12,7 @@ use App\Models\Task;
 use App\Models\ContractService;
 use App\Models\ContractServiceLayout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class TaskController extends Controller
 {
@@ -96,7 +98,7 @@ class TaskController extends Controller
 
 
 
-    public function getAllTaskss()
+    public function getAllTasksv2()
 {
 
     $tasks = Task::with(['assigned', 'fromable'])->get();
@@ -153,15 +155,25 @@ class TaskController extends Controller
      */
     public function getUserTasks()
     {
-        $user = Auth::user();
-        $tasks = Task::where('assigned_id', 1)
-        ->with(['fromable' => function ($query) {
-            $query->with('salesEmployee');
-        }])
-        ->get();
+        $user = auth()->user();
 
-        return response()->json(['tasks' => $tasks]);
+        // Fetch tasks assigned to the authenticated user
+        $tasks = Task::where('assigned_id', $user->id)->get();
+
+        // Load relationships dynamically based on the `fromable_type`
+        foreach ($tasks as $task) {
+            if ($task->fromable_type === 'user') {
+                $task->load('fromable'); // Load `salesEmployee` for `user`
+            } elseif ($task->fromable_type === 'contract') {
+                $task->load('fromable.salesEmployee'); // Load `fromable` for `contract`
+            }
+        }
+
+        return response()->json($tasks);
     }
+
+
+
 
     /**
      * Admin retrieves all tasks and their details.
@@ -184,9 +196,7 @@ class TaskController extends Controller
      */
     public function updateTaskStatus($task_id)
     {
-        $request = request()->validate([
-            'status' => 'required|string',
-        ]);
+
 
         $task = Task::find($task_id);
 
@@ -194,11 +204,31 @@ class TaskController extends Controller
             return response()->json(['error' => 'Task not found'], 404);
         }
 
-        $task->status = $request['status'];
+        $task->status = 'complete';
         $task->save();
 
         return response()->json(['message' => 'Task status updated successfully']);
     }
+
+
+
+    public function approveTask($task_id)
+    {
+
+
+        $task = Task::find($task_id);
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found'], 404);
+        }
+
+        $task->is_approval = 'true';
+        $task->save();
+
+        return response()->json(['message' => 'The task has been successfully approved.']);
+    }
+
+
 
     public function getContractLayouts($contractId)
     {
@@ -222,5 +252,24 @@ class TaskController extends Controller
         return response()->json(['layouts' => $layouts], 200);
     }
 
+
+    public function getTeamTasks()
+    {
+        $user = auth()->user();
+
+        $team = Team::with('users')->where('teamleader_id', $user->id)->firstOrFail();
+
+
+        $userIds = $team->users->pluck('id');
+
+
+        $tasks = Task::where('assigned_type', 'user')
+            ->whereIn('assigned_id', $userIds)->with('assigned')
+            ->get();
+
+        return response()->json($tasks);
+    }
+
+  
 
 }
