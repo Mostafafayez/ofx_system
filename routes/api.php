@@ -149,11 +149,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{collectionId}/approval', [CollectionController::class, 'updateApproval']);
         Route::post('/{collectionId}/status', [CollectionController::class, 'updateStatus']);
         Route::get('/team/{contract_id}', [CollectionController::class, 'getCollectionPercentageByContract']); // Percentage of collection for team
-
+        Route::post('/{id}', [CollectionController::class, 'updateCollectionWithAdjustments']);
     });
 });
-
-Route::post('/collections/{id}', [CollectionController::class, 'updateCollectionWithAdjustments']);
 
 
 Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
@@ -162,10 +160,13 @@ Route::prefix('myteam')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/collections/{contract_id}', action: [CollectionController::class, 'getTeamcollections']);
 });
 
+
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('layouts', LayoutController::class);
     Route::get('/contracts/{contractId}/layouts', [TaskController::class, 'getContractLayouts']);
 });
+
 
 //Teams
 Route::middleware(['auth:sanctum'])->group(function () {

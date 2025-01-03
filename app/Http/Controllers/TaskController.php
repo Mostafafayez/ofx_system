@@ -36,6 +36,10 @@ class TaskController extends Controller
 
         $contract = Contract::with('services')->findOrFail($id);
 
+        
+        if ($contract->status === 'approved') {
+            return response()->json(['message' => 'The contract is already approved.'], 200);
+        }
 
         $contract->status = $request->status;
         $contract->save();
@@ -270,6 +274,6 @@ class TaskController extends Controller
         return response()->json($tasks);
     }
 
-  
+
 
 }
