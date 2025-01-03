@@ -148,7 +148,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/sales', [CollectionController::class, 'getAllCollectionsBySales']);
         Route::post('/{collectionId}/approval', [CollectionController::class, 'updateApproval']);
         Route::post('/{collectionId}/status', [CollectionController::class, 'updateStatus']);
-        Route::get('/team/{contract_id}', [TaskController::class, 'getCollectionPercentageByContract']); // Percentage of collection for team
+        Route::get('/team/{contract_id}', [CollectionController::class, 'getCollectionPercentageByContract']); // Percentage of collection for team
 
     });
 });
